@@ -50,29 +50,28 @@ class Spider(object):
     def _parse_html_for_detailed_info(self, text):
         ''' 解析html内容（从self._get_url_content_for_detailed_info得到的） '''
         raise Exception('Illegal call, this function is an interface function')
-    def _get_rough_play_infos(self):
+    def _get_rough_show_infos(self):
         ''' 获取演出的简略信息 '''
         urls = self._get_rough_info_url_list()
-        rough_play_infos = []
+        rough_show_infos = []
         for url in urls:
-            rough_play_infos += self._parse_html_for_rough_info(self._get_url_content_for_rough_info(url))
-        return rough_play_infos
-    def get_detailed_play_infos(self):
-        rough_play_infos = self._get_rough_play_infos()
-        detailed_play_infos = {}
-        for info in rough_play_infos:
-            name, url = info['name'], info['url']
-            print('[parse] %s: %s' % (name, url))
-            detailed_play_infos[name] = self._parse_html_for_detailed_info(self._get_url_content_for_detailed_info(url))
-        return detailed_play_infos
+            rough_show_infos += self._parse_html_for_rough_info(self._get_url_content_for_rough_info(url))
+        return rough_show_infos
+    def get_detailed_show_infos(self):
+        rough_show_infos = self._get_rough_show_infos()
+        shows = [Show(info) for info in rough_show_infos]
+        for i, show in enumerate(shows):
+            #  print('[parse] %s: %s' % (show.name, show.url))
+            shows[i].add_events(self._parse_html_for_detailed_info(self._get_url_content_for_detailed_info(show.url)))
+        return shows
 
 class ChinaTicket(Spider):
     def __init__(self):
         super(ChinaTicket, self).__init__()   
         self.url_home = 'https://www.chinaticket.com'
     def _get_rough_info_url_list(self):
-        play = 'wenyi' # only for art-plays
-        url = '%s/%s'%(self.url_home, play)
+        show = 'wenyi' # only for art-shows
+        url = '%s/%s'%(self.url_home, show)
         text = self.get_content_use_GET(url)
         whole_s_ticket_list_page_regex = self.get_regex_pattern('whole_s_ticket_list_page_regex', r'<div class="s_ticket_list_page">(.*?)</div>', flag=re.DOTALL)
         whole_s_ticket_list_page = whole_s_ticket_list_page_regex.findall(text)[0]
@@ -84,7 +83,7 @@ class ChinaTicket(Spider):
     def _parse_html_for_rough_info(self, text):
         rough_info_regex = self.get_regex_pattern('rough_info_regex', r'<img src="(?P<image>.*?)".*?/>\s*<a href="(?P<url>.*?)".*?>(?P<name>.*?)</a>')
         regex_res = rough_info_regex.findall(text)
-        infos = [{'image': x[0], 'url': x[1], 'name': x[2]} for x in regex_res]
+        infos = [{'image': x[0], 'url': x[1].strip(), 'name': x[2].strip()} for x in regex_res]
         return infos
     def _parse_html_for_detailed_info(self, text):
         detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'<li class="f_lb_list_shijian">\s*?(?P<day_date>\d*\.\d*\.\d*).*?<span class="f14">(?P<week_date>.*?)</span> (?P<time_date>\d*:\d*).*?<a href="(?P<url>.*?)">.*?\[(?P<province>.*?)\]</span><br />  (?P<place>.*?)</a></li>.*?(?P<total_price><span.*?>.*?</span>)\s*?</li>', flag=re.DOTALL)
@@ -98,14 +97,37 @@ class ChinaTicket(Spider):
             detailed_infos[i].pop('total_price')
         return detailed_infos
 
+class Show(list):
+    def __check_params(self, requested_params, params):
+        for param in requested_params:
+            if params.get(param) is None:
+                raise Exception('%s is requested, but not int detailed_info', param)
+    def __init__(self, params):
+        super(Show, self).__init__()
+        self.__check_params(['name', 'url'], params)
+        self.name = params['name']
+        self.url = params['url']
+    def set_name(self, name):
+        self.name = name
+    def set_url(self, url):
+        self.url = url
+    def add_event(self, detailed_info):
+        self.__check_params(['day_date', 'time_date', 'url', 'province', 'place', 'in_sale_price', 'sold_out_price'], detailed_info)
+        self.append(detailed_info)
+    def add_events(self, detailed_infos):
+        for info in detailed_infos:
+            self.add_event(info)
+    def __str__(self):
+        info_str = '[%s] %s\n' % (self.name, self.url)
+        for info in self:
+            for item, value in info.items():
+                info_str += '<%s>: %s\n' % (item, str(value))
+            info_str += '- - - - - - - - - - - - - - - - - - - - - - - - - -\n'
+        return info_str
+
 if __name__ == '__main__':
     s = ChinaTicket()
-    plays = s.get_detailed_play_infos()
-    #  plays = s._get_rough_play_infos()
-    for name in plays:
-        print(name)
-        for item in plays[name]:
-            for x in item:
-                print('[%s]: %s' % (x, str(item[x])))
-            print('-----------------------------')
-        print('==============================')
+    shows = s.get_detailed_show_infos()
+    for show in shows:
+        print(show)
+        print('===================================================')

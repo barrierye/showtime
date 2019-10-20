@@ -22,3 +22,7 @@
 - Python 3.4+
 - requests
 
+## TODO
+
+- 多进程支持
+- 待支持网站/APP/小程序
