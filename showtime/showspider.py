@@ -14,7 +14,8 @@ class Spider(object):
             setattr(self, attr, re.compile(regex_str, flag))
         return getattr(self, attr)
     def _is_url_begin_with_http(self, url):
-        return re.match(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$', url) is not None
+        http_regex = self.get_regex_pattern('http_regex', r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$')
+        return http_regex.match(url) is not None
     def _get_default_header(self, browser_type='Chrome'):
         if browser_type == 'Chrome':
             header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'}
@@ -105,12 +106,8 @@ class Show(list):
     def __init__(self, params):
         super(Show, self).__init__()
         self.__check_params(['name', 'url'], params)
-        self.name = params['name']
-        self.url = params['url']
-    def set_name(self, name):
-        self.name = name
-    def set_url(self, url):
-        self.url = url
+        for attr, value in params.items():
+            setattr(self, attr, value)
     def add_event(self, detailed_info):
         self.__check_params(['day_date', 'time_date', 'url', 'province', 'place', 'in_sale_price', 'sold_out_price'], detailed_info)
         self.append(detailed_info)
