@@ -125,9 +125,3 @@ class Show(list):
             info_str += '- - - - - - - - - - - - - - - - - - - - - - - - - -\n'
         return info_str
 
-if __name__ == '__main__':
-    s = ChinaTicket()
-    shows = s.get_detailed_show_infos()
-    for show in shows:
-        print(show)
-        print('===================================================')

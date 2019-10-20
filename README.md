@@ -19,8 +19,29 @@
 
 ## Requirements
 
-- Python 3.4+
-- requests
+- Python 3
+- pip
+- wheel
+
+## Installation
+
+```bash
+python setup.py bdist_wheel
+pip install dist/showtime-0.0.0-py3-none-any.whl
+```
+
+## Usage
+
+```python
+from showtime.showspider import ChinaTicket
+
+if __name__ == '__main__':
+    s = ChinaTicket()
+    shows = s.get_detailed_show_infos()
+    for show in shows:
+        print(show)
+        print('===================================================')
+```
 
 ## TODO
 
