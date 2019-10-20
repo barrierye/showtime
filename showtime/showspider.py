@@ -57,7 +57,7 @@ class Spider(object):
         for url in urls:
             rough_show_infos += self._parse_html_for_rough_info(self._get_url_content_for_rough_info(url))
         return rough_show_infos
-    def get_detailed_show_infos(self):
+    def get_shows(self):
         rough_show_infos = self._get_rough_show_infos()
         shows = [Show(info) for info in rough_show_infos]
         for i, show in enumerate(shows):

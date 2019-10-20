@@ -37,7 +37,7 @@ from showtime.showspider import ChinaTicket
 
 if __name__ == '__main__':
     s = ChinaTicket()
-    shows = s.get_detailed_show_infos()
+    shows = s.get_shows()
     for show in shows:
         print(show)
         print('===================================================')
