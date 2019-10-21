@@ -124,7 +124,7 @@ class ChinaTicket(WebSpider):
     def _parse_html_for_detailed_info(self, text):
         detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'<li class="f_lb_list_shijian">\s*?(?P<day_date>\d*\.\d*\.\d*).*?<span class="f14">(?P<week_date>.*?)</span> (?P<time_date>\d*:\d*).*?<a href="(?P<url>.*?)">.*?\[(?P<province>.*?)\]</span><br />  (?P<place>.*?)</a></li>.*?(?P<total_price><span.*?>.*?</span>)\s*?</li>', flag=re.DOTALL)
         regex_res = detailed_info_regex.findall(text)
-        detailed_infos = [{'day_date': x[0], \
+        detailed_infos = [{'day_date': x[0].replace('.', '-'), \
                            'week_date': x[1], \
                            'time_date': x[2], \
                            'url': x[3], \
@@ -134,8 +134,8 @@ class ChinaTicket(WebSpider):
         in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex', r'<span>(.*?)</span>')
         sold_out_price_regex = self.get_regex_pattern('sold_out_price_regex', r'<span class="ys">(.*?)</span>')
         for i, info in enumerate(detailed_infos):
-            detailed_infos[i]['in_sale_price'] = in_sale_price_regex.findall(info['total_price'])
-            detailed_infos[i]['sold_out_price'] = sold_out_price_regex.findall(info['total_price'])
+            detailed_infos[i]['in_sale_price'] = [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
+            detailed_infos[i]['sold_out_price'] = [float(x) for x in sold_out_price_regex.findall(info['total_price'])]
             detailed_infos[i].pop('total_price')
         return detailed_infos
 
@@ -151,17 +151,17 @@ class BeihangSunriseConcertHall(WebSpider):
         infos = [{'url': self.source_url + x[0], 'name': x[1].strip()} for x in regex_res]
         return infos
     def _parse_html_for_detailed_info(self, text):
-        detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'【演出时间】(?P<day_date>\d*?年\d*?月\d*日)(?P<time_date>\d*?:\d*).*?【网上售票时间】(?P<reminder_time>\d*?年\d*?月\d*日).*?【演出地点】(?P<place>.*?)</span>.*?【票价】(?P<total_price>.*?)</span>', flag=re.DOTALL)
+        detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'【演出时间】(?P<day_date>\d*?年\d*?月\d*)日(?P<time_date>\d*?:\d*).*?【网上售票时间】(?P<reminder_time>\d*?年\d*?月\d*)日.*?【演出地点】(?P<place>.*?)</span>.*?【票价】(?P<total_price>.*?)</span>', flag=re.DOTALL)
         regex_res = detailed_info_regex.findall(text)
-        detailed_infos = [{'day_date': x[0], \
+        detailed_infos = [{'day_date': x[0].replace('年', '-').replace('月', '-'), \
                            'time_date': x[1], \
-                           'reminder_time': x[2], \
+                           'reminder_time': x[2].replace('年', '-').replace('月', '-'), \
                            'place': x[3], \
                            'total_price': x[4], \
                            'province': '北京'} for x in regex_res]
         in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex', r'(\d*?)[/元]')
         for i, info in enumerate(detailed_infos):
-            detailed_infos[i]['in_sale_price'] = in_sale_price_regex.findall(info['total_price'])
+            detailed_infos[i]['in_sale_price'] = [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
             detailed_infos[i]['sold_out_price'] = []
             detailed_infos[i].pop('total_price')
         return detailed_infos
