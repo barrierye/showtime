@@ -59,7 +59,8 @@ class Show(list):
 
         Raises:
             Exception: 当params中不存在'day_date', 'time_date', 'url', 'province',
-                       'place', 'in_sale_price', 'sold_out_price'时会抛出异常
+                       'place', 'in_sale_price', 'sold_out_price'或数据格式不正确
+                       时会抛出异常
         """
         if 'url' not in detailed_info:
             detailed_info['url'] = self.url
