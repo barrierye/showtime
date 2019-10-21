@@ -1,6 +1,9 @@
 #-*- coding:utf8 -*-
 # Copyright (c) 2019 barriery
 # Python release: 3.7.0
+'''
+该模块包含了Show类的定义
+'''
 
 class Show(list):
     """存储具体单个show的所有场次的类

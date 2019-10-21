@@ -5,6 +5,7 @@ import re
 import sys
 import html
 import requests
+import multiprocessing
 from showtime.show import Show
 
 class WebSpider(object):
@@ -52,19 +53,50 @@ class WebSpider(object):
     def _parse_html_for_detailed_info(self, text):
         ''' 解析html内容（从self._get_url_content_for_detailed_info得到的） '''
         raise Exception('Illegal call, this function is an interface function')
-    def _get_rough_show_infos(self):
+    def _get_process_num(self, is_parallel, process_num):
+        if process_num is None:
+            if is_parallel:
+                process_num = multiprocessing.cpu_count()
+            else:
+                process_num = 1
+        elif process_num <= 0:
+            process_num = 1
+        return process_num
+    def _get_and_parse_for_rough_info_warpper(self, url):
+        return self._parse_html_for_rough_info(self._get_url_content_for_rough_info(url))
+    def _get_rough_show_infos(self, is_parallel=True, process_num=None):
         ''' 获取演出的简略信息 '''
         urls = self._get_rough_info_url_list()
         rough_show_infos = []
-        for url in urls:
-            rough_show_infos += self._parse_html_for_rough_info(self._get_url_content_for_rough_info(url))
+        process_num = self._get_process_num(is_parallel, process_num)
+        if process_num == 1:
+            for url in urls:
+                rough_show_infos += self._parse_html_for_rough_info(self._get_url_content_for_rough_info(url))
+        else:
+            pool = multiprocessing.Pool(processes=process_num)
+            pool_outputs = pool.map(self._get_and_parse_for_rough_info_warpper, urls)
+            pool.close()
+            pool.join()
+            for res in pool_outputs:
+                rough_show_infos += list(res)
         return rough_show_infos
-    def get_shows(self):
-        rough_show_infos = self._get_rough_show_infos()
+    def _get_and_parse_for_detailed_info_warpper(self, url):
+        return self._parse_html_for_detailed_info(self._get_url_content_for_detailed_info(url))
+    def get_shows(self, is_parallel=True, process_num=None):
+        process_num = self._get_process_num(is_parallel, process_num)
+        rough_show_infos = self._get_rough_show_infos(is_parallel, process_num)
         shows = [Show(info) for info in rough_show_infos]
-        for i, show in enumerate(shows):
-            #  print('[parse] %s: %s' % (show.name, show.url))
-            shows[i].add_events(self._parse_html_for_detailed_info(self._get_url_content_for_detailed_info(show.url)))
+        if process_num == 1:
+            for i, show in enumerate(shows):
+                shows[i].add_events(self._parse_html_for_detailed_info(self._get_url_content_for_detailed_info(show.url)))
+        else:
+            urls = [show.url for show in shows]
+            pool = multiprocessing.Pool(processes=process_num)
+            pool_outputs = pool.map(self._get_and_parse_for_detailed_info_warpper, urls)
+            pool.close()
+            pool.join()
+            for i, show in enumerate(shows):
+                shows[i].add_events(pool_outputs[i])
         return shows
 
 class ChinaTicket(WebSpider):
@@ -90,7 +122,13 @@ class ChinaTicket(WebSpider):
     def _parse_html_for_detailed_info(self, text):
         detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'<li class="f_lb_list_shijian">\s*?(?P<day_date>\d*\.\d*\.\d*).*?<span class="f14">(?P<week_date>.*?)</span> (?P<time_date>\d*:\d*).*?<a href="(?P<url>.*?)">.*?\[(?P<province>.*?)\]</span><br />  (?P<place>.*?)</a></li>.*?(?P<total_price><span.*?>.*?</span>)\s*?</li>', flag=re.DOTALL)
         regex_res = detailed_info_regex.findall(text)
-        detailed_infos = [{'day_date': x[0], 'week_date': x[1], 'time_date': x[2], 'url': x[3], 'province': x[4], 'place': x[5], 'total_price': x[6]} for x in regex_res]
+        detailed_infos = [{'day_date': x[0], \
+                           'week_date': x[1], \
+                           'time_date': x[2], \
+                           'url': x[3], \
+                           'province': x[4], \
+                           'place': x[5], \
+                           'total_price': x[6]} for x in regex_res]
         in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex', r'<span>(.*?)</span>')
         sold_out_price_regex = self.get_regex_pattern('sold_out_price_regex', r'<span class="ys">(.*?)</span>')
         for i, info in enumerate(detailed_infos):
