@@ -53,13 +53,15 @@ class WebSpider(object):
     def _parse_html_for_detailed_info(self, text):
         ''' 解析html内容（从self._get_url_content_for_detailed_info得到的） '''
         raise Exception('Illegal call, this function is an interface function')
-    def _get_process_num(self, is_parallel, process_num):
+    def _get_process_num(self, is_parallel, process_num, item_num):
         if process_num is None:
             if is_parallel:
                 process_num = multiprocessing.cpu_count()
             else:
                 process_num = 1
-        elif process_num <= 0:
+        if process_num > item_num:
+            process_num = item_num
+        if process_num <= 0:
             process_num = 1
         return process_num
     def _get_and_parse_for_rough_info_warpper(self, url):
@@ -68,7 +70,7 @@ class WebSpider(object):
         ''' 获取演出的简略信息 '''
         urls = self._get_rough_info_url_list()
         rough_show_infos = []
-        process_num = self._get_process_num(is_parallel, process_num)
+        process_num = self._get_process_num(is_parallel, process_num, len(urls))
         if process_num == 1:
             for url in urls:
                 rough_show_infos += self._parse_html_for_rough_info(self._get_url_content_for_rough_info(url))
@@ -83,9 +85,9 @@ class WebSpider(object):
     def _get_and_parse_for_detailed_info_warpper(self, url):
         return self._parse_html_for_detailed_info(self._get_url_content_for_detailed_info(url))
     def get_shows(self, is_parallel=True, process_num=None):
-        process_num = self._get_process_num(is_parallel, process_num)
         rough_show_infos = self._get_rough_show_infos(is_parallel, process_num)
         shows = [Show(info) for info in rough_show_infos]
+        process_num = self._get_process_num(is_parallel, process_num, len(shows))
         if process_num == 1:
             for i, show in enumerate(shows):
                 shows[i].add_events(self._parse_html_for_detailed_info(self._get_url_content_for_detailed_info(show.url)))
@@ -102,10 +104,10 @@ class WebSpider(object):
 class ChinaTicket(WebSpider):
     def __init__(self):
         super(ChinaTicket, self).__init__()   
-        self.url_home = 'https://www.chinaticket.com'
+        self.source_url = 'https://www.chinaticket.com'
     def _get_rough_info_url_list(self):
         show = 'wenyi' # only for art-shows
-        url = '%s/%s'%(self.url_home, show)
+        url = '%s/%s'%(self.source_url, show)
         text = self.get_content_use_GET(url)
         whole_s_ticket_list_page_regex = self.get_regex_pattern('whole_s_ticket_list_page_regex', r'<div class="s_ticket_list_page">(.*?)</div>', flag=re.DOTALL)
         whole_s_ticket_list_page = whole_s_ticket_list_page_regex.findall(text)[0]
@@ -134,5 +136,32 @@ class ChinaTicket(WebSpider):
         for i, info in enumerate(detailed_infos):
             detailed_infos[i]['in_sale_price'] = in_sale_price_regex.findall(info['total_price'])
             detailed_infos[i]['sold_out_price'] = sold_out_price_regex.findall(info['total_price'])
+            detailed_infos[i].pop('total_price')
+        return detailed_infos
+
+class BeiHangSunriseConcertHall(WebSpider):
+    def __init__(self):
+        super(BeiHangSunriseConcertHall, self).__init__()
+        self.source_url = 'https://www.forqian.cn'
+    def _get_rough_info_url_list(self):
+        return [self.source_url]
+    def _parse_html_for_rough_info(self, text):
+        rough_info_regex = self.get_regex_pattern('rough_info_regex', r'<div class="col-xs-4">.*?<a href="(?P<url>.*?)">.*?<p class="text-nowrap title-performance">(?P<name>.*?)</p>', flag=re.DOTALL)
+        regex_res = rough_info_regex.findall(text)
+        infos = [{'url': self.source_url + x[0], 'name': x[1].strip()} for x in regex_res]
+        return infos
+    def _parse_html_for_detailed_info(self, text):
+        detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'【演出时间】(?P<day_date>\d*?年\d*?月\d*日)(?P<time_date>\d*?:\d*).*?【网上售票时间】(?P<reminder_time>\d*?年\d*?月\d*日).*?【演出地点】(?P<place>.*?)</span>.*?【票价】(?P<total_price>.*?)</span>', flag=re.DOTALL)
+        regex_res = detailed_info_regex.findall(text)
+        detailed_infos = [{'day_date': x[0], \
+                           'time_date': x[1], \
+                           'reminder_time': x[2], \
+                           'place': x[3], \
+                           'total_price': x[4], \
+                           'province': '北京'} for x in regex_res]
+        in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex', r'(\d*?)[/元]')
+        for i, info in enumerate(detailed_infos):
+            detailed_infos[i]['in_sale_price'] = in_sale_price_regex.findall(info['total_price'])
+            detailed_infos[i]['sold_out_price'] = []
             detailed_infos[i].pop('total_price')
         return detailed_infos

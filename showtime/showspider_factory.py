@@ -11,7 +11,8 @@ class ShowSpiderFactory(object):
 
     def __init__(self):
         self._spider_type = ['web']
-        self._web_spiders = {'https://www.chinaticket.com': webspider.ChinaTicket()}
+        self._web_spiders = {'https://www.chinaticket.com': webspider.ChinaTicket(),
+                             'https://www.forqian.cn': webspider.BeiHangSunriseConcertHall(),}
        
         self._spiders = None
         for t in self._spider_type:

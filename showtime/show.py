@@ -43,7 +43,7 @@ class Show(list):
                            'place', 'in_sale_price', 'sold_out_price'，其中，
                                 day_date - 该场具体日期
                                 time_date - 该场当天具体时间
-                                url - 该场购票详细地址
+                                url - 该场购票详细地址(这项如果拿不到，则用self.url填充)
                                 province - 该场所在省份
                                 place - 该场具体位置
                                 in_sale_price - 仍在销售中的价格
@@ -53,6 +53,8 @@ class Show(list):
             Exception: 当params中不存在'day_date', 'time_date', 'url', 'province',
                        'place', 'in_sale_price', 'sold_out_price'时会抛出异常
         """
+        if 'url' not in detailed_info:
+            detailed_info['url'] = self.url
         self.__check_params(['day_date', 'time_date', 'url', 'province', 'place', 'in_sale_price', 'sold_out_price'], detailed_info)
         self.append(detailed_info)
     def add_events(self, detailed_infos):
