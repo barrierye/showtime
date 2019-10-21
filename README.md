@@ -25,7 +25,6 @@
 ## Requirements
 
 - Python 3
-- pip
 - wheel
 
 ## Installation
