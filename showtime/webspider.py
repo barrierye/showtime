@@ -139,9 +139,9 @@ class ChinaTicket(WebSpider):
             detailed_infos[i].pop('total_price')
         return detailed_infos
 
-class BeiHangSunriseConcertHall(WebSpider):
+class BeihangSunriseConcertHall(WebSpider):
     def __init__(self):
-        super(BeiHangSunriseConcertHall, self).__init__()
+        super(BeihangSunriseConcertHall, self).__init__()
         self.source_url = 'https://www.forqian.cn'
     def _get_rough_info_url_list(self):
         return [self.source_url]
