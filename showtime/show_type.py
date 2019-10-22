@@ -5,7 +5,7 @@
 该模块包含了Show类的定义
 '''
 import re
-from showtime import show_pb2
+#  from showtime import show_pb2
 
 def check_params(requested_params, params):
     for param in requested_params:
