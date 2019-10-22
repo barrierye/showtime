@@ -84,25 +84,27 @@ class WebSpider(object):
         showlist = show_type.ShowList(self.source)
         urls = self._get_rough_url_list()
 
-        process_num = self._get_process_num(is_parallel, process_num, len(urls))
-        if process_num != 1:
-            pool = multiprocessing.Pool(processes=process_num)
+        pnum = self._get_process_num(is_parallel, process_num, len(urls))
         
         # get rough infos
         rough_show_infos = []
-        if process_num == 1:
+        if pnum == 1:
             for url in urls:
                 rough_show_infos += self._parse_for_rough_info(self._get_rough_page(url))
         else:
+            pool = multiprocessing.Pool(processes=pnum)
             for infos in pool.map(self._warpper_for_get_and_parse_for_rough_info, urls):
                 rough_show_infos += list(infos)
+            pool.close()
         showlist.add_shows([show_type.Show(info) for info in rough_show_infos])
 
         # get detailed infos
-        if process_num == 1:
+        pnum = self._get_process_num(is_parallel, process_num, len(showlist))
+        if pnum == 1:
             for i, show in enumerate(showlist):
                 showlist[i].add_events(self._parse_for_detailed_info(self._get_detailed_page(show.url)))
         else:
+            pool = multiprocessing.Pool(processes=pnum)
             urls = [show.url for show in showlist]
             pool_outputs = pool.map(self._warpper_for_get_and_parse_for_detailed_info, urls)
             pool.close()
@@ -137,26 +139,26 @@ class ChinaTicket(WebSpider):
     def _parse_for_detailed_info(self, text):
         detailed_info_regex = self.get_regex_pattern('detailed_info_regex',
                 r'<li class="f_lb_list_shijian">\s*?(?P<day_date>\d*\.\d*\.\d*).*?<span '
-                'class="f14">(?P<week_date>.*?)</span> (?P<time_date>\d*:\d*).*?<a href="'
-                '(?P<url>.*?)">.*?\[(?P<province>.*?)\]</span><br />  (?P<place>.*?)</a>'
-                '</li>.*?(?P<total_price><span.*?>.*?</span>)\s*?</li>', flag=re.DOTALL)
+                r'class="f14">(?P<week_date>.*?)</span> (?P<time_date>\d*:\d*).*?<a href="'
+                r'(?P<place_url>.*?)">.*?\[(?P<province>.*?)\]</span><br />  (?P<place>.*?)'
+                r'</a></li>.*?(?P<total_price><span.*?>.*?</span>)\s*?</li>', flag=re.DOTALL)
         regex_res = detailed_info_regex.findall(text)
         detailed_infos = [{'day_date': x[0].replace('.', '-'), \
                            'week_date': x[1], \
                            'time_date': x[2], \
-                           'url': x[3], \
+                           'place_url': x[3], \
                            'province': x[4], \
                            'place': x[5], \
                            'total_price': x[6]} for x in regex_res]
-        in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex',
+        in_sale_prices_regex = self.get_regex_pattern('in_sale_prices_regex',
                 r'<span>(.*?)</span>')
-        sold_out_price_regex = self.get_regex_pattern('sold_out_price_regex',
+        sold_out_prices_regex = self.get_regex_pattern('sold_out_prices_regex',
                 r'<span class="ys">(.*?)</span>')
         for i, info in enumerate(detailed_infos):
-            detailed_infos[i]['in_sale_price'] = \
-                    [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
-            detailed_infos[i]['sold_out_price'] = \
-                    [float(x) for x in sold_out_price_regex.findall(info['total_price'])]
+            detailed_infos[i]['in_sale_prices'] = \
+                    [float(x) for x in in_sale_prices_regex.findall(info['total_price'])]
+            detailed_infos[i]['sold_out_prices'] = \
+                    [float(x) for x in sold_out_prices_regex.findall(info['total_price'])]
             detailed_infos[i].pop('total_price')
         return detailed_infos
 
@@ -169,15 +171,15 @@ class BeihangSunriseConcertHall(WebSpider):
     def _parse_for_rough_info(self, text):
         rough_info_regex = self.get_regex_pattern('rough_info_regex',
                 r'<div class="col-xs-4">.*?<a href="(?P<url>.*?)">.*?<p class='
-                '"text-nowrap title-performance">(?P<name>.*?)</p>', flag=re.DOTALL)
+                r'"text-nowrap title-performance">(?P<name>.*?)</p>', flag=re.DOTALL)
         regex_res = rough_info_regex.findall(text)
         infos = [{'url': self.source + x[0], 'name': x[1].strip()} for x in regex_res]
         return infos
     def _parse_for_detailed_info(self, text):
         detailed_info_regex = self.get_regex_pattern('detailed_info_regex',
                 r'【演出时间】(?P<day_date>\d*?年\d*?月\d*)日(?P<time_date>\d*?:\d*).*?'
-                '【网上售票时间】(?P<reminder_time>\d*?年\d*?月\d*)日.*?【演出地点】'
-                '(?P<place>.*?)</span>.*?【票价】(?P<total_price>.*?)</span>', flag=re.DOTALL)
+                r'【网上售票时间】(?P<reminder_time>\d*?年\d*?月\d*)日.*?【演出地点】'
+                r'(?P<place>.*?)</span>.*?【票价】(?P<total_price>.*?)</span>', flag=re.DOTALL)
         regex_res = detailed_info_regex.findall(text)
         detailed_infos = [{'day_date': x[0].replace('年', '-').replace('月', '-'), \
                            'time_date': x[1], \
@@ -185,10 +187,10 @@ class BeihangSunriseConcertHall(WebSpider):
                            'place': x[3], \
                            'total_price': x[4], \
                            'province': '北京'} for x in regex_res]
-        in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex', r'(\d*?)[/元]')
+        in_sale_prices_regex = self.get_regex_pattern('in_sale_prices_regex', r'(\d*?)[/元]')
         for i, info in enumerate(detailed_infos):
-            detailed_infos[i]['in_sale_price'] = \
-                    [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
-            detailed_infos[i]['sold_out_price'] = []
+            detailed_infos[i]['in_sale_prices'] = \
+                    [float(x) for x in in_sale_prices_regex.findall(info['total_price'])]
+            detailed_infos[i]['sold_out_prices'] = []
             detailed_infos[i].pop('total_price')
         return detailed_infos

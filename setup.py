@@ -22,6 +22,7 @@ setup(
 
     install_requires=[
         'requests==2.22.0',
+        'protobuf==3.10.0',
     ],
 
     packages = find_packages(where='.'),
