@@ -59,43 +59,32 @@ if __name__ == '__main__':
 
 如果支持信息来源列表中没有你需要的，你可以帮忙编写贡献代码。
 
-- WebSpider
+### WebSpider
 
-  ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g87bdn9ix7j30lp0gwjre.jpg)
+![](https://tva1.sinaimg.cn/large/006y8mN6gy1g87bdn9ix7j30lp0gwjre.jpg)
 
-  ```txt
-  信息来源为Web的爬虫类需要继承WebSpider父类，WebSpider提供了一些默认方法和多进程支持。
-  
-  WebSpider是这样工作的：
-  1. 通过`_get_rough_url_list`方法获取简略的url列表`rough_info_url_list`
-     从这些url中可以得到每场演出的名称和具体信息的url。
-  2. 遍历`rough_info_url_list`中的url，通过`_get_rough_page`方法获取这些
-     url对应的内容`rough_page`。`_get_rough_page`方法默认实现是GET。
-  3. 使用`_parse_for_rough_info`方法对每个`rough_page`进行解析，得到每场演
-     出的名称和具体信息的url。
-  4. 对于每场演出具体信息的url，使用`_get_detailed_page`方法获取对应的内容
-     `detailed_page`。`_get_detailed_page`方法默认实现是GET。
-  5. 使用`_parse_for_detailed_info`方法对每个`detailed_page`进行解析，
-     得到每场演出的具体信息。
-  
-  你至少需要：
-  - 重写类变量source，这是webspider在工厂类中注册的凭证
-  - 重写方法`_get_rough_url_list`
-  - 重写方法`_parse_for_rough_info`
-  - 重写方法`_parse_for_detailed_info`
-  ```
+信息来源为Web的爬虫类需要继承WebSpider父类，WebSpider提供了一些默认方法和多进程支持。
 
-- AppSpider
+WebSpider是这样工作的：
+1. 通过`_get_rough_url_list`方法获取简略的url列表`rough_info_url_list`，从这些url中可以得到每场演出的名称和具体信息的url。
+2. 遍历`rough_info_url_list`中的url，通过`_get_rough_page`方法获取这些url对应的内容`rough_page`。`_get_rough_page`方法默认实现是GET。
+3. 使用`_parse_for_rough_info`方法对每个`rough_page`进行解析，得到每场演出的名称和具体信息的url。
+4. 对于每场演出具体信息的url，使用`_get_detailed_page`方法获取对应的内容`detailed_page`。`_get_detailed_page`方法默认实现是GET。
+5. 使用`_parse_for_detailed_info`方法对每个`detailed_page`进行解析，得到每场演出的具体信息。
 
-  ```txt
-  //TODO
-  ```
+你至少需要：
+- 重写类变量source，这是webspider在工厂类中注册的凭证
+- 重写方法`_get_rough_url_list`
+- 重写方法`_parse_for_rough_info`
+- 重写方法`_parse_for_detailed_info`
 
-- SmallProgramSpider
+### AppSpider
 
-  ```txt
-  //TODO
-  ```
+TODO
 
-  
+### WechatProgramSpider
+
+TODO
+
+
 
