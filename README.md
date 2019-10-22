@@ -73,7 +73,7 @@ WebSpider是这样工作的：
 5. 使用`_parse_for_detailed_info`方法对每个`detailed_page`进行解析，得到每场演出的具体信息。
 
 你至少需要：
-- 重写类变量source，这是webspider在工厂类中注册的凭证
+- 重写类变量source，这是webspider在工厂类中自动注册的凭证
 - 重写方法`_get_rough_url_list`
 - 重写方法`_parse_for_rough_info`
 - 重写方法`_parse_for_detailed_info`

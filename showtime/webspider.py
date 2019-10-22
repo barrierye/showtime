@@ -23,24 +23,30 @@ class WebSpider(object):
             self._regex_pool[regex_str] = re.compile(regex_str, flag)
         return self._regex_pool[regex_str]
     def _is_url_begin_with_http(self, url):
-        http_regex = self.get_regex_pattern('http_regex', r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$')
+        http_regex = self.get_regex_pattern('http_regex',
+                r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.'
+                '[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$')
         return http_regex.match(url) is not None
     def _get_default_header(self, browser_type='Chrome'):
         header = None
         if browser_type == 'Chrome':
-            header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'}
+            header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit'
+                                    '/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'}
         elif 'IE': # Internet Explorer 10
             header = {'User-Agent': 'Mozilla/5.0 (MSIE 10.0; Windows NT 6.1; Trident/5.0)'}
         elif 'iOS': # iPhone6
-            header = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'}
+            header = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit'
+                                    '/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'}
         elif 'Android': # Android KitKat
-            header = {'User-Agent': 'Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.114 Mobile Safari/537.36'}
+            header = {'User-Agent': 'Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit'
+                                    '/537.36 (KHTML, like Gecko) Chrome/34.0.1847.114 Mobile Safari/537.36'}
         elif 'Firefox': # Mac Firefox 33
             header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10; rv:33.0) Gecko/20100101 Firefox/33.0'}
         elif 'Opera': # Opera 12.14
             header = {'User-Agent': 'Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14'}
         elif 'Safari': # Mac Safari 7
-            header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A'}
+            header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14'
+                                    ' (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A'}
         return header
     def get_page_by_GET(self, url):
         return self._session.get(url, headers=self._get_default_header()).content.decode('utf-8')
@@ -112,20 +118,28 @@ class ChinaTicket(WebSpider):
         show = 'wenyi' # only for art-shows
         url = '%s/%s'%(self.source, show)
         text = self.get_page_by_GET(url)
-        whole_s_ticket_list_page_regex = self.get_regex_pattern('whole_s_ticket_list_page_regex', r'<div class="s_ticket_list_page">(.*?)</div>', flag=re.DOTALL)
+        whole_s_ticket_list_page_regex = self.get_regex_pattern('whole_s_ticket_list_page_regex',
+                r'<div class="s_ticket_list_page">(.*?)</div>', flag=re.DOTALL)
         whole_s_ticket_list_page = whole_s_ticket_list_page_regex.findall(text)[0]
-        s_ticket_list_page_regex = self.get_regex_pattern('s_ticket_list_page_regex', r'<a href="(?P<url>.*?)">\d*</a>')
+        s_ticket_list_page_regex = self.get_regex_pattern('s_ticket_list_page_regex',
+                r'<a href="(?P<url>.*?)">\d*</a>')
         # 这里需要url解码，否则访问失败
         # see: https://stackoverflow.com/questions/2360598/how-do-i-unescape-html-entities-in-a-string-in-python-3-1
-        urls = [html.unescape(x) for x in s_ticket_list_page_regex.findall(whole_s_ticket_list_page)]
+        urls = [html.unescape(x) \
+                for x in s_ticket_list_page_regex.findall(whole_s_ticket_list_page)]
         return [url] + urls
     def _parse_for_rough_info(self, text):
-        rough_info_regex = self.get_regex_pattern('rough_info_regex', r'<img src="(?P<image>.*?)".*?/>\s*<a href="(?P<url>.*?)".*?>(?P<name>.*?)</a>')
+        rough_info_regex = self.get_regex_pattern('rough_info_regex',
+                r'<img src="(?P<image>.*?)".*?/>\s*<a href="(?P<url>.*?)".*?>(?P<name>.*?)</a>')
         regex_res = rough_info_regex.findall(text)
         infos = [{'image': x[0], 'url': x[1].strip(), 'name': x[2].strip()} for x in regex_res]
         return infos
     def _parse_for_detailed_info(self, text):
-        detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'<li class="f_lb_list_shijian">\s*?(?P<day_date>\d*\.\d*\.\d*).*?<span class="f14">(?P<week_date>.*?)</span> (?P<time_date>\d*:\d*).*?<a href="(?P<url>.*?)">.*?\[(?P<province>.*?)\]</span><br />  (?P<place>.*?)</a></li>.*?(?P<total_price><span.*?>.*?</span>)\s*?</li>', flag=re.DOTALL)
+        detailed_info_regex = self.get_regex_pattern('detailed_info_regex',
+                r'<li class="f_lb_list_shijian">\s*?(?P<day_date>\d*\.\d*\.\d*).*?<span '
+                'class="f14">(?P<week_date>.*?)</span> (?P<time_date>\d*:\d*).*?<a href="'
+                '(?P<url>.*?)">.*?\[(?P<province>.*?)\]</span><br />  (?P<place>.*?)</a>'
+                '</li>.*?(?P<total_price><span.*?>.*?</span>)\s*?</li>', flag=re.DOTALL)
         regex_res = detailed_info_regex.findall(text)
         detailed_infos = [{'day_date': x[0].replace('.', '-'), \
                            'week_date': x[1], \
@@ -134,11 +148,15 @@ class ChinaTicket(WebSpider):
                            'province': x[4], \
                            'place': x[5], \
                            'total_price': x[6]} for x in regex_res]
-        in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex', r'<span>(.*?)</span>')
-        sold_out_price_regex = self.get_regex_pattern('sold_out_price_regex', r'<span class="ys">(.*?)</span>')
+        in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex',
+                r'<span>(.*?)</span>')
+        sold_out_price_regex = self.get_regex_pattern('sold_out_price_regex',
+                r'<span class="ys">(.*?)</span>')
         for i, info in enumerate(detailed_infos):
-            detailed_infos[i]['in_sale_price'] = [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
-            detailed_infos[i]['sold_out_price'] = [float(x) for x in sold_out_price_regex.findall(info['total_price'])]
+            detailed_infos[i]['in_sale_price'] = \
+                    [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
+            detailed_infos[i]['sold_out_price'] = \
+                    [float(x) for x in sold_out_price_regex.findall(info['total_price'])]
             detailed_infos[i].pop('total_price')
         return detailed_infos
 
@@ -149,12 +167,17 @@ class BeihangSunriseConcertHall(WebSpider):
     def _get_rough_url_list(self):
         return [self.source]
     def _parse_for_rough_info(self, text):
-        rough_info_regex = self.get_regex_pattern('rough_info_regex', r'<div class="col-xs-4">.*?<a href="(?P<url>.*?)">.*?<p class="text-nowrap title-performance">(?P<name>.*?)</p>', flag=re.DOTALL)
+        rough_info_regex = self.get_regex_pattern('rough_info_regex',
+                r'<div class="col-xs-4">.*?<a href="(?P<url>.*?)">.*?<p class='
+                '"text-nowrap title-performance">(?P<name>.*?)</p>', flag=re.DOTALL)
         regex_res = rough_info_regex.findall(text)
         infos = [{'url': self.source + x[0], 'name': x[1].strip()} for x in regex_res]
         return infos
     def _parse_for_detailed_info(self, text):
-        detailed_info_regex = self.get_regex_pattern('detailed_info_regex', r'【演出时间】(?P<day_date>\d*?年\d*?月\d*)日(?P<time_date>\d*?:\d*).*?【网上售票时间】(?P<reminder_time>\d*?年\d*?月\d*)日.*?【演出地点】(?P<place>.*?)</span>.*?【票价】(?P<total_price>.*?)</span>', flag=re.DOTALL)
+        detailed_info_regex = self.get_regex_pattern('detailed_info_regex',
+                r'【演出时间】(?P<day_date>\d*?年\d*?月\d*)日(?P<time_date>\d*?:\d*).*?'
+                '【网上售票时间】(?P<reminder_time>\d*?年\d*?月\d*)日.*?【演出地点】'
+                '(?P<place>.*?)</span>.*?【票价】(?P<total_price>.*?)</span>', flag=re.DOTALL)
         regex_res = detailed_info_regex.findall(text)
         detailed_infos = [{'day_date': x[0].replace('年', '-').replace('月', '-'), \
                            'time_date': x[1], \
@@ -164,7 +187,8 @@ class BeihangSunriseConcertHall(WebSpider):
                            'province': '北京'} for x in regex_res]
         in_sale_price_regex = self.get_regex_pattern('in_sale_price_regex', r'(\d*?)[/元]')
         for i, info in enumerate(detailed_infos):
-            detailed_infos[i]['in_sale_price'] = [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
+            detailed_infos[i]['in_sale_price'] = \
+                    [float(x) for x in in_sale_price_regex.findall(info['total_price'])]
             detailed_infos[i]['sold_out_price'] = []
             detailed_infos[i].pop('total_price')
         return detailed_infos
