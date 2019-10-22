@@ -13,9 +13,7 @@ if __name__ == '__main__':
         # 获取每个资源对应的spider实例
         spider = spider_factory.get_spider(source)
         # 爬取show信息，默认多进程并且开cpu_num个进程，可以自行指定进程数
-        shows = spider.get_shows(is_parallel=False)
-        for show in shows:
+        show_list = spider.get_show_list(is_parallel=False)
+        for show in show_list:
             # 打印show的简略信息
             print(show)
-            # 打印show的详细信息
-            # print(show.detailed_info())
