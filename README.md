@@ -25,11 +25,11 @@
 ## Requirements
 
 - Python3.4+
-- wheel
 
 ## Installation
 
 ```bash
+pip install wheel
 python setup.py bdist_wheel
 pip install dist/showtime-0.0.0-py3-none-any.whl
 ```
@@ -43,9 +43,10 @@ from showtime.showspider_factory import ShowSpiderFactory
 def print_info(show_list, rough=True):
     for show in show_list:
         print(show)
-        if not rough:
-            for e in show:
-                print(e)
+        if rough:
+            continue
+        for e in show:
+            print(e)
 
 if __name__ == '__main__':
     # 获取showspider的工厂实例
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 
 ## Contribute code
 
-如果支持信息来源列表中没有你需要的，你可以帮忙编写贡献代码。
+如果支持信息来源列表中没有你需要的，你可以根据下面的文档进行拓展开发，并提交PR贡献代码。
 
 ### WebSpider
 

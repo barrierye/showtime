@@ -25,10 +25,12 @@ class ShowList(list):
     def add_shows(self, shows):
         for show in shows:
             self.add_show(show)
-    def save(self, filename):
+    def save(self, filename, display_chinese=True):
         self.gen_proto()
         with open(filename, 'w') as f:
-            f.write(text_format.MessageToString(self.proto))
+            # set as_utf8 to True can correctly displays Chinese characters
+            # see: https://github.com/protocolbuffers/protobuf/issues/4062
+            f.write(text_format.MessageToString(self.proto, as_utf8=display_chinese))
     def serialize_save(self, filename):
         self.gen_proto()
         with open(filename, 'wb') as f:

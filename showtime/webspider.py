@@ -113,12 +113,13 @@ class WebSpider(object):
         return showlist
 
 class ChinaTicket(WebSpider):
-    source = 'https://www.chinaticket.com'
+    source = 'ChinaTicket'
     def __init__(self):
-        super(ChinaTicket, self).__init__()   
+        super(ChinaTicket, self).__init__()
+        self._home_url = 'https://www.chinaticket.com'
     def _get_rough_url_list(self):
         show = 'wenyi' # only for art-shows
-        url = '%s/%s'%(self.source, show)
+        url = '%s/%s'%(self._home_url, show)
         text = self.get_page_by_GET(url)
         whole_s_ticket_list_page_regex = self.get_regex_pattern('whole_s_ticket_list_page_regex',
                 r'<div class="s_ticket_list_page">(.*?)</div>', flag=re.DOTALL)
@@ -163,17 +164,18 @@ class ChinaTicket(WebSpider):
         return detailed_infos
 
 class BeihangSunriseConcertHall(WebSpider):
-    source = 'https://www.forqian.cn'
+    source = 'BeihangSunriseConcertHall'
     def __init__(self):
         super(BeihangSunriseConcertHall, self).__init__()
+        self._home_url = 'https://www.forqian.cn'
     def _get_rough_url_list(self):
-        return [self.source]
+        return [self._home_url]
     def _parse_for_rough_info(self, text):
         rough_info_regex = self.get_regex_pattern('rough_info_regex',
                 r'<div class="col-xs-4">.*?<a href="(?P<url>.*?)">.*?<p class='
                 r'"text-nowrap title-performance">(?P<name>.*?)</p>', flag=re.DOTALL)
         regex_res = rough_info_regex.findall(text)
-        infos = [{'url': self.source + x[0], 'name': x[1].strip()} for x in regex_res]
+        infos = [{'url': self._home_url + x[0], 'name': x[1].strip()} for x in regex_res]
         return infos
     def _parse_for_detailed_info(self, text):
         detailed_info_regex = self.get_regex_pattern('detailed_info_regex',
