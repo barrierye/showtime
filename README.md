@@ -20,10 +20,10 @@
 ## TODO
 
 1. 考虑到页面的爬取是一个IO密集型操作，尝试用线程池替换进程池来减缓进程间通信带来的开销
-2. 在`1`的基础上在工厂中提供进程池的支持，即不同spider之间用进程池来优化
+2. 在`1`的基础上在工厂中提供多进程的支持，即不同spider用多进程来优化
 3. 支持尚未支持的Web信息来源
-4. 思考AppSpider的基类结构
-5. 思考AppletSpider的基类结构
+4. 思考AppSpider的基类架构
+5. 思考AppletSpider的基类架构
 6. 支持北航晨兴音乐厅的线上预定
 
 ## Requirements
@@ -90,14 +90,22 @@ if __name__ == '__main__':
 信息来源为Web的爬虫类需要继承WebSpider基类，WebSpider提供了一些默认方法和多进程支持。
 
 WebSpider是这样工作的：
-1. 通过`_get_rough_url_list`方法获取简略的url列表`rough_info_url_list`，从这些url中可以得到每场演出的名称和具体信息的url。
-2. 遍历`rough_info_url_list`中的url，通过`_get_rough_page`方法获取这些url对应的内容`rough_page`。`_get_rough_page`方法默认实现是GET。
-3. 使用`_parse_for_rough_info`方法对每个`rough_page`进行解析，得到每场演出的名称和具体信息的url。
-4. 对于每场演出具体信息的url，使用`_get_detailed_page`方法获取对应的内容`detailed_page`。`_get_detailed_page`方法默认实现是GET。
+1. 通过`_get_rough_url_list`方法获取简略的url列表`rough_url_list`，从这些url中可以得到每场演出的名称和具体信息的url。
+
+2. 遍历`rough_url_list`中的url，通过`_get_rough_page`方法获取这些url对应的内容`rough_page`。
+
+   `_get_rough_page`方法默认实现是GET，如果页面需要登陆等操作则需要重写该方法。
+
+3. 使用`_parse_for_rough_info`方法对每个`rough_page`进行解析，得到每场演出的名称和具体信息的url的列表`detailed_url_list`。
+
+4. 遍历`detailed_url_list`中的url，使用`_get_detailed_page`方法获取对应的内容`detailed_page`。
+
+   `_get_detailed_page`方法默认实现是GET，如果页面需要登陆等操作则需要重写该方法。
+
 5. 使用`_parse_for_detailed_info`方法对每个`detailed_page`进行解析，得到每场演出的具体信息。
 
-你至少需要：
-- 重写类变量source，这是webspider在工厂类中自动注册的凭证
+添加一个无需登录等操作的webspider，你至少需要：
+- 重写类变量source（资源来源），这是webspider在工厂类中自动注册的凭证
 - 重写方法`_get_rough_url_list`
 - 重写方法`_parse_for_rough_info`
 - 重写方法`_parse_for_detailed_info`
