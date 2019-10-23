@@ -87,7 +87,7 @@ class WebSpider(object):
             for url in urls:
                 rough_show_infos += self._parse_for_rough_info(self._get_rough_page(url))
         else:
-            pool = multiprocessing.dummy.Pool(pnum)
+            pool = multiprocessing.dummy.Pool(processes=pnum)
             for infos in pool.map(self._warpper_for_get_and_parse_for_rough_info, urls):
                 rough_show_infos += list(infos)
             pool.close()
@@ -99,7 +99,7 @@ class WebSpider(object):
             for i, show in enumerate(showlist):
                 showlist[i].add_events(self._parse_for_detailed_info(self._get_detailed_page(show.url)))
         else:
-            pool = multiprocessing.dummy.Pool(pnum)
+            pool = multiprocessing.dummy.Pool(processes=pnum)
             urls = [show.url for show in showlist]
             pool_outputs = pool.map(self._warpper_for_get_and_parse_for_detailed_info, urls)
             pool.close()
