@@ -19,8 +19,12 @@
 
 ## TODO
 
-- 支持未支持的信息来源
-- 支持北航晨兴音乐厅的线上预定
+1. 考虑到页面的爬取是一个IO密集型操作，尝试用线程池替换进程池来减缓进程间通信带来的开销
+2. 在`1`的基础上在工厂中提供进程池的支持，即不同spider之间用进程池来优化
+3. 支持尚未支持的Web信息来源
+4. 思考AppSpider的基类结构
+5. 思考AppletSpider的基类结构
+6. 支持北航晨兴音乐厅的线上预定
 
 ## Requirements
 
@@ -83,7 +87,7 @@ if __name__ == '__main__':
 
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g87bdn9ix7j30lp0gwjre.jpg)
 
-信息来源为Web的爬虫类需要继承WebSpider父类，WebSpider提供了一些默认方法和多进程支持。
+信息来源为Web的爬虫类需要继承WebSpider基类，WebSpider提供了一些默认方法和多进程支持。
 
 WebSpider是这样工作的：
 1. 通过`_get_rough_url_list`方法获取简略的url列表`rough_info_url_list`，从这些url中可以得到每场演出的名称和具体信息的url。
@@ -102,7 +106,7 @@ WebSpider是这样工作的：
 
 TODO
 
-### WechatProgramSpider
+### AppletSpider
 
 TODO
 
