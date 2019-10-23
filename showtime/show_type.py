@@ -25,7 +25,16 @@ class ShowList(list):
     def add_shows(self, shows):
         for show in shows:
             self.add_show(show)
+    def gen_proto(self):
+        if self.proto is not None:
+            return self.proto
+        self.proto = show_type_pb2.ShowList()
+        self.proto.source = self.source
+        for show in self:
+            self.proto.shows.append(show.gen_proto())
+        return self.proto
     def save(self, filename, display_chinese=True):
+        ''' save data to filename human-friendly '''
         self.gen_proto()
         with open(filename, 'w') as f:
             # set as_utf8 to True can correctly displays Chinese characters
@@ -47,14 +56,6 @@ class ShowList(list):
         with open(filename, 'rb') as f:
             proto.ParseFromString(f.read())
         return ShowList.parse_from_proto(proto)
-    def gen_proto(self):
-        if self.proto is not None:
-            return self.proto
-        self.proto = show_type_pb2.ShowList()
-        self.proto.source = self.source
-        for show in self:
-            self.proto.shows.append(show.gen_proto())
-        return self.proto
     @staticmethod
     def parse_from_proto(proto):
         showlist = ShowList(proto.source)
