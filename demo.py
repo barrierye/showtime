@@ -35,3 +35,6 @@ if __name__ == '__main__':
 
     # 从本地文件加载show_list
     #  show_list = showtime.show_type.ShowList.load('%s.data' % source)
+
+    # 获取protobuf对象
+    #  proto = show_list.gen_proto()

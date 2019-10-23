@@ -15,7 +15,7 @@
   - [ ] 大麦 [APP]
   - [ ] 音乐节RSS [小程序]
 - 支持单机多进程运行
-- 使用protobuf支持简单的本地存储/加载功能
+- 支持简单的本地存储/加载功能（使用protobuf）
 
 ## TODO
 
@@ -24,7 +24,7 @@
 
 ## Requirements
 
-- Python3.4+
+Python3.4+
 
 ## Installation
 
@@ -70,6 +70,9 @@ if __name__ == '__main__':
     
     # 从本地文件加载show_list
     #  show_list = showtime.show_type.ShowList.load('show_list.data')
+    
+    # 获取protobuf对象
+    #  proto = show_list.gen_proto()
 ```
 
 ## Contribute code
