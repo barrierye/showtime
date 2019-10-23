@@ -4,9 +4,10 @@
 import re
 import sys
 import html
+import asyncio
+import aiohttp
 import requests
 import multiprocessing
-import multiprocessing.dummy
 
 # Do not import Show class and ShowList class directly,
 # in case the factory class incorrectly registers the
@@ -18,6 +19,7 @@ class WebSpider(object):
     source = None
     def __init__(self):
         self._session = requests.Session()
+        self._semaphore = asyncio.Semaphore(12)
     def _is_url_begin_with_http(self, url):
         http_regex = re.compile(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.'
                                 r'[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$')
@@ -43,6 +45,12 @@ class WebSpider(object):
             header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14'
                                     ' (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A'}
         return header
+    async def async_get_page_by_GET(self, url, index, page_lsit):
+        async with self._semaphore:
+            async with aiohttp.ClientSession() as session:
+                async with session.request('GET', url) as resp:
+                    page = await resp.text()
+                    page_lsit.append((index, page))
     def get_page_by_GET(self, url):
         return self._session.get(url, headers=self._get_default_header('IE')).content.decode('utf-8')
     def _get_rough_url_list(self):
@@ -51,60 +59,58 @@ class WebSpider(object):
     def _get_rough_page(self, url):
         ''' 获取给定url（从self._get_rough_url_list的搭配的url）的内容，default是直接GET '''
         return self.get_page_by_GET(url)
+    def _async_get_rough_page(self, url, index, page_lsit):
+        ''' 获取给定url（从self._get_rough_url_list的搭配的url）的内容，default是直接GET '''
+        return self.async_get_page_by_GET(url, index, page_lsit)
     def _parse_for_rough_info(self, text):
         ''' 解析html内容（从self._get_rough_page得到的），返回值为[{'url': xxx, 'name': yyy}, ...] '''
         raise NotImplementedError
     def _get_detailed_page(self, url):
         ''' 获取给定url（包含演出详细信息的url）的内容，default是直接GET '''
         return self.get_page_by_GET(url)
+    def _async_get_detailed_page(self, url, index, page_lsit):
+        ''' 获取给定url（包含演出详细信息的url）的内容，default是直接GET '''
+        return self.async_get_page_by_GET(url, index, page_lsit)
     def _parse_for_detailed_info(self, text):
         ''' 解析html内容（从self._get_detailed_page得到的） '''
         raise NotImplementedError
-    def _get_thread_num(self, is_parallel, thread_num, item_num):
-        if thread_num is None:
+    def _get_process_num(self, is_parallel, process_num, item_num):
+        if process_num is None:
             if is_parallel:
-                thread_num = multiprocessing.cpu_count()
+                process_num = multiprocessing.cpu_count()
             else:
-                thread_num = 1
-        if thread_num > item_num:
-            thread_num = item_num
-        if thread_num <= 0:
-            thread_num = 1
-        return thread_num
-    def _warpper_for_get_and_parse_for_rough_info(self, url):
-        return self._parse_for_rough_info(self._get_rough_page(url))
-    def _warpper_for_get_and_parse_for_detailed_info(self, url):
-        return self._parse_for_detailed_info(self._get_detailed_page(url))
-    def get_show_list(self, is_parallel=True, thread_num=None):
+                process_num = 1
+        if process_num > item_num:
+            process_num = item_num
+        if process_num <= 0:
+            process_num = 1
+        return process_num
+    def get_show_list(self, is_parallel=True, process_num=None):
         showlist = show_type.ShowList(self.source)
         urls = self._get_rough_url_list()
 
-        pnum = self._get_thread_num(is_parallel, thread_num, len(urls))
-        
         # get rough infos
+        page_lsit = []
+        loop = asyncio.get_event_loop()
+        tasks = [self._async_get_rough_page(url, index, page_lsit) for index, url in enumerate(urls)]
+        loop.run_until_complete(asyncio.wait(tasks))
+
         rough_show_infos = []
-        if pnum == 1:
-            for url in urls:
-                rough_show_infos += self._parse_for_rough_info(self._get_rough_page(url))
-        else:
-            pool = multiprocessing.dummy.Pool(pnum)
-            for infos in pool.map(self._warpper_for_get_and_parse_for_rough_info, urls):
-                rough_show_infos += list(infos)
-            pool.close()
+        for page in page_lsit:
+            rough_show_infos += self._parse_for_rough_info(page[1])
+
         showlist.add_shows([show_type.Show(info) for info in rough_show_infos])
 
         # get detailed infos
-        pnum = self._get_thread_num(is_parallel, thread_num, len(showlist))
-        if pnum == 1:
-            for i, show in enumerate(showlist):
-                showlist[i].add_events(self._parse_for_detailed_info(self._get_detailed_page(show.url)))
-        else:
-            pool = multiprocessing.dummy.Pool(pnum)
-            urls = [show.url for show in showlist]
-            pool_outputs = pool.map(self._warpper_for_get_and_parse_for_detailed_info, urls)
-            pool.close()
-            for i, show in enumerate(showlist):
-                showlist[i].add_events(pool_outputs[i])
+        page_lsit = []
+        loop = asyncio.get_event_loop() # only one instance
+        tasks = [self._async_get_detailed_page(show.url, index, page_lsit) for index, show in enumerate(showlist)]
+        loop.run_until_complete(asyncio.wait(tasks))
+        #  loop.close() # can not close because loop is the only one instance
+        page_lsit.sort(key=lambda e: e[0])
+
+        for i, show in enumerate(showlist):
+            showlist[i].add_events(self._parse_for_detailed_info(page_lsit[i][1]))
         return showlist
 
 class ChinaTicket(WebSpider):

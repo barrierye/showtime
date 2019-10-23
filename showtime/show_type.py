@@ -113,8 +113,8 @@ class Show(list):
     @staticmethod
     def parse_from_proto(proto):
         params = {'name': proto.name, 'url': proto.url}
-        for extra in proto.extra_fields:
-            params[extra.key] = extra.value
+        for key, value in proto.extra_fields.items():
+            params[key] = value
         show = Show(params)
         for event in proto.events:
             show.append(Event.parse_from_proto(event))
