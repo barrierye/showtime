@@ -12,16 +12,13 @@ import multiprocessing.dummy
 # in case the factory class incorrectly registers the
 # webspider classes.
 from showtime import show_type
+from showtime import utils
 
 class WebSpider(object):
     # # PAY ATTITION THAT `source` need be rewrite
     source = None
     def __init__(self):
         self._session = requests.Session()
-    def _is_url_begin_with_http(self, url):
-        http_regex = re.compile(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.'
-                                r'[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$')
-        return http_regex.match(url) is not None
     def _get_default_header(self, browser_type='Chrome'):
         header = None
         if browser_type == 'Chrome':
@@ -60,17 +57,6 @@ class WebSpider(object):
     def _parse_for_detailed_info(self, text):
         ''' 解析html内容（从self._get_detailed_page得到的） '''
         raise NotImplementedError
-    def _get_thread_num(self, is_parallel, thread_num, item_num):
-        if thread_num is None:
-            if is_parallel:
-                thread_num = multiprocessing.cpu_count()
-            else:
-                thread_num = 1
-        if thread_num > item_num:
-            thread_num = item_num
-        if thread_num <= 0:
-            thread_num = 1
-        return thread_num
     def _warpper_for_get_and_parse_for_rough_info(self, url):
         return self._parse_for_rough_info(self._get_rough_page(url))
     def _warpper_for_get_and_parse_for_detailed_info(self, url):
@@ -79,27 +65,27 @@ class WebSpider(object):
         showlist = show_type.ShowList(self.source)
         urls = self._get_rough_url_list()
 
-        pnum = self._get_thread_num(is_parallel, thread_num, len(urls))
+        tnum = utils.get_process_num(is_parallel, thread_num, len(urls))
         
         # get rough infos
         rough_show_infos = []
-        if pnum == 1:
+        if tnum == 1:
             for url in urls:
                 rough_show_infos += self._parse_for_rough_info(self._get_rough_page(url))
         else:
-            pool = multiprocessing.dummy.Pool(processes=pnum)
+            pool = multiprocessing.dummy.Pool(processes=tnum)
             for infos in pool.map(self._warpper_for_get_and_parse_for_rough_info, urls):
                 rough_show_infos += list(infos)
             pool.close()
         showlist.add_shows([show_type.Show(info) for info in rough_show_infos])
 
         # get detailed infos
-        pnum = self._get_thread_num(is_parallel, thread_num, len(showlist))
-        if pnum == 1:
+        tnum = utils.get_process_num(is_parallel, thread_num, len(showlist))
+        if tnum == 1:
             for i, show in enumerate(showlist):
                 showlist[i].add_events(self._parse_for_detailed_info(self._get_detailed_page(show.url)))
         else:
-            pool = multiprocessing.dummy.Pool(processes=pnum)
+            pool = multiprocessing.dummy.Pool(processes=tnum)
             urls = [show.url for show in showlist]
             pool_outputs = pool.map(self._warpper_for_get_and_parse_for_detailed_info, urls)
             pool.close()

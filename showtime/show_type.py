@@ -5,6 +5,8 @@
 该模块包含了ShowList，Show，Event类的定义
 '''
 import re
+
+from showtime import utils
 from showtime import show_type_pb2
 from google.protobuf import text_format
 
@@ -166,8 +168,7 @@ class Event(dict):
     def _valid_time_date(self, time_date):
         return re.match(r'\d{1,2}:\d{2}', time_date) is not None
     def _valid_url(self, url):
-        return re.match(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.'
-                r'[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$', url) is not None
+        return utils.is_url_begin_with_http(url)
     def _valid_province(self, province):
         # data from: https://baike.baidu.com/item/中国城市新分级名单?fr=aladdin
         valid_provinces = set(['北京', '天津', '上海', '重庆', '河北', '山西', '辽宁', \

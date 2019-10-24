@@ -10,12 +10,13 @@
   - [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
   - [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
   - [ ] 中国电影资料馆 [https://www.cfa.org.cn](https://www.cfa.org.cn/)
+  - [ ] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
   - [ ] 蜂巢剧场官网 [http://www.fengchaojuchang.org.cn](http://www.fengchaojuchang.org.cn/)
   - [ ] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
   - [ ] 大麦 [APP]
   - [ ] 音乐节RSS [小程序]
   
-- 支持单机并行
+- 支持单机并行（spider间多进程，spider内多线程）
 
   考虑到页面的爬取是一个IO密集型操作，Python的GIL可能不再是一个限制。
 
@@ -25,11 +26,10 @@
 
 - 支持简单的本地存储/加载功能
 
-  为了使得数据清晰简单，采用protobuf。支持human-friendly和序列化存储。
+  为了使得数据清晰简单，采用protobuf支持human-friendly/序列化存储。
 
 ## TODO
 
-1. 在工厂中提供多进程的支持，即不同spider用多进程来优化
 2. 支持尚未支持的Web信息来源
 3. 频繁爬取数据，服务器拒绝访问
 4. 思考AppSpider的基类架构
@@ -62,31 +62,24 @@ def print_info(show_list, rough=True):
         for e in show:
             print(e)
 
+def load_file(filename):
+    return showtime.show_type.ShowList.load(filename)
+
 if __name__ == '__main__':
     # 获取showspider的工厂实例
     spider_factory = ShowSpiderFactory()
-    
+
     # 获取目前已经支持的资源列表
     support_sources = spider_factory.support_sources()
-    
-    # 获取资源对应的spider实例
-    spider = spider_factory.get_spider(support_sources[0])
-    
-    # 爬取show信息，默认多进程并且开cpu_num个进程，可以自行指定进程数
-    #  show_list = spider.get_show_list(is_parallel=False)
-    show_list = spider.get_show_list()
-    
+
+    # 多进程获取所有资源对应spider的show_list，同时在每个spider内部开线程池
+    total_show_list = spider_factory.get_total_show_list(support_sources, is_parallel=True)
+
     # 打印show_list的简略信息
-    print_info(show_list, rough=True)
-    
-    # 将结果存储到本地
-    show_list.save('show_list.data')
-    
-    # 从本地文件加载show_list
-    #  show_list = showtime.show_type.ShowList.load('show_list.data')
-    
-    # 获取protobuf对象
-    #  proto = show_list.gen_proto()
+    for show_list in total_show_list:
+        print_info(show_list, rough=True)
+        # 将结果存储到本地
+        show_list.save('%s.data' % show_list.source)
 ```
 
 ## Contribute code

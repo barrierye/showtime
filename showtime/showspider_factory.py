@@ -3,7 +3,10 @@
 # Python release: 3.7.0
 import sys
 import inspect
+import multiprocessing
+
 from showtime import webspider
+from showtime import utils
 
 class ShowSpiderFactory(object):
     def __new__(self, *args, **kwargs):
@@ -30,3 +33,13 @@ class ShowSpiderFactory(object):
 
     def get_spider(self, source):
         return self._spiders.get(source)
+    
+    def get_show_list(self, source, is_parallel=True, thread_num=None):
+        return self.get_spider(source).get_show_list(is_parallel, thread_num)
+
+    def get_total_show_list(self, source_list, is_parallel=True, process_num=None):
+        pnum = utils.get_process_num(is_parallel, process_num, len(source_list))
+        pool = multiprocessing.Pool(processes=pnum)
+        total_show_list = pool.map(self.get_show_list, source_list)
+        pool.close()
+        return total_show_list
