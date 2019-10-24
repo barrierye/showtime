@@ -2,7 +2,7 @@
 
 # showtime
 
-用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，生活需要一点情趣！
+用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，__生活需要一点情调__！
 
 ## Feature
 
@@ -18,7 +18,7 @@
   
 - 支持单机并行
 
-  spider间多进程并行，spider内粗粒度多线程并行。一些特殊spider（如`source`为`MengJingHuiWebsite`的spider）内细粒度协程并行。
+  spider间多进程并行，spider内粗粒度多线程并行。一些特殊spider内（如`MengJingHuiWebsite`）细粒度协程并行。
 
 - 支持简单的本地存储/加载功能
 
