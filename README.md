@@ -12,15 +12,13 @@
   - [ ] 中国电影资料馆 [https://www.cfa.org.cn](https://www.cfa.org.cn/)
   - [ ] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
   - [ ] 蜂巢剧场官网 [http://www.fengchaojuchang.org.cn](http://www.fengchaojuchang.org.cn/)
-  - [ ] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
+  - [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/) （暂未完全支持）
   - [ ] 大麦 [APP]
   - [ ] 音乐节RSS [小程序]
   
 - 支持单机并行
 
-  spider间多进程并行，spider内多线程并行。
-
-  （协程，线程池和进程池对比代码见branch`coroutine_thread_and_process`分支的`./showtime/backup/`）
+  spider间多进程并行，spider内粗粒度多线程并行。一些特殊spider（如`source`为`MengJingHuiWebsite`的spider）内细粒度协程并行。
 
 - 支持简单的本地存储/加载功能
 
@@ -28,7 +26,7 @@
 
 ## TODO
 
-2. 支持尚未支持的Web信息来源
+1. 支持尚未支持的Web信息来源
 3. 频繁爬取数据，服务器拒绝访问
 4. 思考AppSpider的基类架构
 5. 思考AppletSpider的基类架构
@@ -36,7 +34,7 @@
 
 ## Requirements
 
-Python3.4+
+Python3.5+
 
 ## Installation
 

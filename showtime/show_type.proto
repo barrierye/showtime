@@ -13,12 +13,16 @@ message Show {
 }
 
 message Event {
-  string day_date = 1; // YYYY-mm-dd
-  string time_date = 2; // HH:MM
+  string date = 1; // YYYY-mm-dd
+  string time = 2; // HH:MM
   string url = 3; // http-url or https-url
-  string province = 4; // 34个省级行政区域以及一线，新一线和二线城市，不带'省'和'市'等后缀，2-3个字
-  string place = 5;
-  repeated float in_sale_prices = 6;
-  repeated float sold_out_prices = 7;
-  map<string, string> extra_fields = 8;
+  string city = 4; // 34个省级行政区域以及一线，新一线和二线城市，不带'省'和'市'等后缀，2-3个字
+  string address = 5;
+  Price prices = 6;
+  map<string, string> extra_fields = 7;
+}
+
+message Price {
+  repeated float in_sale = 1;
+  repeated float sold_out = 2;
 }

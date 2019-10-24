@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0fshow_type.proto\"0\n\x08ShowList\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\x14\n\x05shows\x18\x02 \x03(\x0b\x32\x05.Show\"\x9b\x01\n\x04Show\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x16\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x06.Event\x12,\n\x0c\x65xtra_fields\x18\x04 \x03(\x0b\x32\x16.Show.ExtraFieldsEntry\x1a\x32\n\x10\x45xtraFieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xee\x01\n\x05\x45vent\x12\x10\n\x08\x64\x61y_date\x18\x01 \x01(\t\x12\x11\n\ttime_date\x18\x02 \x01(\t\x12\x0b\n\x03url\x18\x03 \x01(\t\x12\x10\n\x08province\x18\x04 \x01(\t\x12\r\n\x05place\x18\x05 \x01(\t\x12\x16\n\x0ein_sale_prices\x18\x06 \x03(\x02\x12\x17\n\x0fsold_out_prices\x18\x07 \x03(\x02\x12-\n\x0c\x65xtra_fields\x18\x08 \x03(\x0b\x32\x17.Event.ExtraFieldsEntry\x1a\x32\n\x10\x45xtraFieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0fshow_type.proto\"0\n\x08ShowList\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\x14\n\x05shows\x18\x02 \x03(\x0b\x32\x05.Show\"\x9b\x01\n\x04Show\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x16\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x06.Event\x12,\n\x0c\x65xtra_fields\x18\x04 \x03(\x0b\x32\x16.Show.ExtraFieldsEntry\x1a\x32\n\x10\x45xtraFieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xca\x01\n\x05\x45vent\x12\x0c\n\x04\x64\x61te\x18\x01 \x01(\t\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x0b\n\x03url\x18\x03 \x01(\t\x12\x0c\n\x04\x63ity\x18\x04 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x05 \x01(\t\x12\x16\n\x06prices\x18\x06 \x01(\x0b\x32\x06.Price\x12-\n\x0c\x65xtra_fields\x18\x07 \x03(\x0b\x32\x17.Event.ExtraFieldsEntry\x1a\x32\n\x10\x45xtraFieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"*\n\x05Price\x12\x0f\n\x07in_sale\x18\x01 \x03(\x02\x12\x10\n\x08sold_out\x18\x02 \x03(\x02\x62\x06proto3')
 )
 
 
@@ -198,14 +198,14 @@ _EVENT = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='day_date', full_name='Event.day_date', index=0,
+      name='date', full_name='Event.date', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='time_date', full_name='Event.time_date', index=1,
+      name='time', full_name='Event.time', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -219,36 +219,29 @@ _EVENT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='province', full_name='Event.province', index=3,
+      name='city', full_name='Event.city', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='place', full_name='Event.place', index=4,
+      name='address', full_name='Event.address', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='in_sale_prices', full_name='Event.in_sale_prices', index=5,
-      number=6, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
+      name='prices', full_name='Event.prices', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sold_out_prices', full_name='Event.sold_out_prices', index=6,
-      number=7, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='extra_fields', full_name='Event.extra_fields', index=7,
-      number=8, type=11, cpp_type=10, label=3,
+      name='extra_fields', full_name='Event.extra_fields', index=6,
+      number=7, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -266,7 +259,45 @@ _EVENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=228,
-  serialized_end=466,
+  serialized_end=430,
+)
+
+
+_PRICE = _descriptor.Descriptor(
+  name='Price',
+  full_name='Price',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='in_sale', full_name='Price.in_sale', index=0,
+      number=1, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='sold_out', full_name='Price.sold_out', index=1,
+      number=2, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=432,
+  serialized_end=474,
 )
 
 _SHOWLIST.fields_by_name['shows'].message_type = _SHOW
@@ -274,10 +305,12 @@ _SHOW_EXTRAFIELDSENTRY.containing_type = _SHOW
 _SHOW.fields_by_name['events'].message_type = _EVENT
 _SHOW.fields_by_name['extra_fields'].message_type = _SHOW_EXTRAFIELDSENTRY
 _EVENT_EXTRAFIELDSENTRY.containing_type = _EVENT
+_EVENT.fields_by_name['prices'].message_type = _PRICE
 _EVENT.fields_by_name['extra_fields'].message_type = _EVENT_EXTRAFIELDSENTRY
 DESCRIPTOR.message_types_by_name['ShowList'] = _SHOWLIST
 DESCRIPTOR.message_types_by_name['Show'] = _SHOW
 DESCRIPTOR.message_types_by_name['Event'] = _EVENT
+DESCRIPTOR.message_types_by_name['Price'] = _PRICE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ShowList = _reflection.GeneratedProtocolMessageType('ShowList', (_message.Message,), {
@@ -316,6 +349,13 @@ Event = _reflection.GeneratedProtocolMessageType('Event', (_message.Message,), {
   })
 _sym_db.RegisterMessage(Event)
 _sym_db.RegisterMessage(Event.ExtraFieldsEntry)
+
+Price = _reflection.GeneratedProtocolMessageType('Price', (_message.Message,), {
+  'DESCRIPTOR' : _PRICE,
+  '__module__' : 'show_type_pb2'
+  # @@protoc_insertion_point(class_scope:Price)
+  })
+_sym_db.RegisterMessage(Price)
 
 
 _SHOW_EXTRAFIELDSENTRY._options = None

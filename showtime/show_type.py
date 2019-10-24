@@ -13,7 +13,7 @@ from google.protobuf import text_format
 def check_params(requested_params, params):
     for param in requested_params:
         if params.get(param) is None:
-            raise Exception('%s is requested param, but not found.', param)
+            raise Exception('<%s> is requested param, but not found.' % param)
 
 class ShowList(list):
     def __init__(self, source):
@@ -91,12 +91,9 @@ class Show(list):
     def add_event(self, detailed_info):
         """向Show中添加一个场次
         Args:
-            detailed_info: 至少包含'day_date', 'time_date', 'province',
-                           'place', 'in_sale_prices', 'sold_out_prices'.
-                           若不包含'url'字段则用self.url填充
+            detailed_info: 至少包含'date', 'time', 'city', 'url',
+                           'address', 'in_sale_prices', 'sold_out_prices'.
         """
-        if 'url' not in detailed_info:
-            detailed_info['url'] = self.url
         self.append(Event(detailed_info))
     def add_events(self, detailed_infos):
         for info in detailed_infos:
@@ -126,33 +123,33 @@ class Event(dict):
     def __init__(self, params):
         """类Event的构造函数
         Args:
-            params: 至少包含'day_date', 'time_date', 'url', 'province', 'place',
+            params: 至少包含'date', 'time', 'url', 'city', 'address',
                     'in_sale_prices', 'sold_out_prices'的dict，其中，
-                          - day_date: 该场具体日期
+                          - date: 该场具体日期
                             <format>: YYYY-mm-dd
-                          - time_date: 该场当天具体时间
+                          - time: 该场当天具体时间
                             <format>: HH:MM
                           - url: 该场购票详细地址(这项如果拿不到，则用self.url填充)
                             <format>: url should begin with 'http' or 'https'
-                          - province: 该场所在省份
+                          - city: 该场所在省份
                             <format>: 34个省级行政区域以及一线，新一线和二线城市，
                                       不带'省'和'市'等后缀，2-3个字
-                          - place: 该场具体位置
+                          - address: 该场具体位置
                             <format>: pass
                           - in_sale_prices: 仍在销售中的价格
                             <format>: the list of float elements
                           - sold_out_prices: 已经卖完的价格
                             <format>: the list of float elements
         Raises:
-            Exception: 当params中不存在'day_date', 'time_date', 'url', 'province',
-                       'place', 'in_sale_prices', 'sold_out_prices'或数据格式不正确
+            Exception: 当params中不存在'date', 'time', 'url', 'city',
+                       'address', 'in_sale_prices', 'sold_out_prices'或数据格式不正确
                        时会抛出异常
         """
         super(Event, self).__init__()
         if not isinstance(params, dict):
             raise TypeError('dict type requested, but get %s.' % type(params))
-        requested_params = ['day_date', 'time_date', 'url', 'province',
-                            'place', 'in_sale_prices', 'sold_out_prices']
+        requested_params = ['date', 'time', 'url', 'city',
+                            'address', 'in_sale_prices', 'sold_out_prices']
         check_params(requested_params, params)
         for param in requested_params:
             valid_param = getattr(self, '_valid_%s'%param)
@@ -163,15 +160,15 @@ class Event(dict):
             self[key] = params[key]
             params.pop(key)
         self.extra_fields = params
-    def _valid_day_date(self, day_date):
-        return re.match(r'\d{4}-\d{1,2}-\d{1,2}', day_date) is not None
-    def _valid_time_date(self, time_date):
-        return re.match(r'\d{1,2}:\d{2}', time_date) is not None
+    def _valid_date(self, date):
+        return re.match(r'\d{4}-\d{1,2}-\d{1,2}', date) is not None
+    def _valid_time(self, time):
+        return re.match(r'\d{1,2}:\d{2}', time) is not None
     def _valid_url(self, url):
         return utils.is_url_begin_with_http(url)
-    def _valid_province(self, province):
+    def _valid_city(self, city):
         # data from: https://baike.baidu.com/item/中国城市新分级名单?fr=aladdin
-        valid_provinces = set(['北京', '天津', '上海', '重庆', '河北', '山西', '辽宁', \
+        valid_citys = set(['北京', '天津', '上海', '重庆', '河北', '山西', '辽宁', \
                                '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西', \
                                '山东', '河南', '湖北', '湖南', '广东', '海南', '四川', \
                                '贵州', '云南', '陕西', '甘肃', '青海', '台湾', '内蒙古', \
@@ -184,8 +181,8 @@ class Event(dict):
                                '南昌', '金华', '常州', '南通', '嘉兴', '太原', '徐州', \
                                '惠州', '珠海', '中山', '台州', '烟台', '兰州', '绍兴', \
                                '海口', '扬州'])
-        return province in valid_provinces
-    def _valid_place(self, place):
+        return city in valid_citys
+    def _valid_address(self, address):
         return True
     def _valid_prices(self, prices):
         if not isinstance(prices, list):
@@ -205,25 +202,25 @@ class Event(dict):
         return info_str
     def gen_proto(self):
         proto = show_type_pb2.Event()
-        proto.day_date = self['day_date']
-        proto.time_date = self['time_date']
+        proto.date = self['date']
+        proto.time = self['time']
         proto.url = self['url']
-        proto.province = self['province']
-        proto.place = self['place']
-        proto.in_sale_prices.extend(self['in_sale_prices'])
-        proto.sold_out_prices.extend(self['sold_out_prices'])
+        proto.city = self['city']
+        proto.address = self['address']
+        proto.prices.in_sale.extend(self['in_sale_prices'])
+        proto.prices.sold_out.extend(self['sold_out_prices'])
         for key, value in self.extra_fields.items():
             proto.extra_fields[key] = value
         return proto
     @staticmethod
     def parse_from_proto(proto):
-        params = {'day_date': proto.day_date,
-                  'time_date': proto.time_date,
+        params = {'date': proto.date,
+                  'time': proto.time,
                   'url': proto.url,
-                  'province': proto.province,
-                  'place': proto.place,
-                  'in_sale_prices': list(proto.in_sale_prices),
-                  'sold_out_prices': list(proto.sold_out_prices)}
+                  'city': proto.city,
+                  'address': proto.address,
+                  'in_sale_prices': list(proto.prices.in_sale),
+                  'sold_out_prices': list(proto.price.sold_out)}
         for key, value in proto.extra_fields.items():
             params[key] = value
         event = Event(params)

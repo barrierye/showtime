@@ -18,9 +18,10 @@ setup(
 
     include_package_data=True,
 
-    python_requires='>=3.4',
+    python_requires='>=3.5',
 
     install_requires=[
+        'aiohttp==3.6.2',
         'requests==2.22.0',
         'protobuf==3.10.0',
     ],
