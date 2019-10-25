@@ -2,7 +2,9 @@
 
 # showtime
 
-用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，__生活需要一点情调__！
+[![](https://img.shields.io/badge/platform-Linux|macOS-brightgreen.svg)]()[![](https://img.shields.io/badge/Python-3.5+-blue.svg)]()[![](https://img.shields.io/github/release/barrierye/showtime.svg)]()
+
+用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，__生活需要一点情调__。
 
 ## Feature
 
