@@ -3,6 +3,7 @@
 # Python release: 3.7.0
 import re
 import time
+import asyncio
 import aiohttp
 import datetime
 import multiprocessing
@@ -12,6 +13,17 @@ async def async_get_page_by_GET(url, index, page_lsit):
         async with session.request('GET', url) as resp:
             page = await resp.text()
             page_lsit.append((index, page))
+
+def async_get_pages_by_GET(urls):
+    page_lsit = []
+    # see: https://stackoverflow.com/questions/46727787/runtimeerror-there-is-no-current-event-loop-in-thread-in-async-apscheduler
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    tasks = [async_get_page_by_GET(url, index, page_lsit) \
+                for index, url in enumerate(urls)]
+    loop.run_until_complete(asyncio.wait(tasks))
+    page_lsit.sort(key=lambda e: e[0])
+    return [page for index, page in page_lsit]
 
 def judge_this_year(month, day):
     current_year = datetime.datetime.now().strftime('%Y')

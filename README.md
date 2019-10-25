@@ -1,6 +1,6 @@
 # showtime
 
-[![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)](https://github.com/barrierye/showtime#requirements) [![release](https://img.shields.io/github/v/tag/barrierye/showtime?label=release)](https://github.com/barrierye/showtime/releases)
+[![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)](https://github.com/barrierye/showtime#requirements) [![release](https://img.shields.io/github/v/tag/barrierye/showtime?label=release)](https://github.com/barrierye/showtime/releases) [![PyPI](https://img.shields.io/pypi/v/show-time)](https://pypi.org/project/show-time/#files)
 
 用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，__生活需要一点情调__。
 
@@ -10,9 +10,9 @@
   - [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
   - [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
   - [ ] 中国电影资料馆 [https://www.cfa.org.cn](https://www.cfa.org.cn/)
-  - [ ] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
+  - [ ] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)，[http://chendabeida.chendachuanmei.com/TReserveManager/SiteReserve.htm](http://chendabeida.chendachuanmei.com/TReserveManager/SiteReserve.htm)
   - [ ] 蜂巢剧场官网 [http://www.fengchaojuchang.org.cn](http://www.fengchaojuchang.org.cn/)
-  - [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/) （暂未完全支持）
+  - [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
   - [ ] 大麦 [APP]
   - [ ] 音乐节RSS [小程序]
   
@@ -26,11 +26,13 @@
 
 ## TODO
 
-1. 支持尚未支持的Web信息来源
-3. 频繁爬取数据，服务器拒绝访问
-4. 思考AppSpider的基类架构
-5. 思考AppletSpider的基类架构
-6. 支持北航晨兴音乐厅的线上预定
+1. 添加logging支持
+2. 为了项目的可持续发展，需要尽快完善注释和文档（资源种类太多，且每种资源的一些设定还是异构的）。
+3. 支持尚未支持的Web信息来源
+4. 频繁爬取数据，服务器拒绝访问
+5. 思考AppSpider的基类架构
+6. 思考AppletSpider的基类架构
+7. 支持北航晨兴音乐厅的线上预定
 
 ## Requirements
 
