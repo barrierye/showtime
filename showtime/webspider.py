@@ -289,30 +289,14 @@ class MengJingHui(WebSpider):
         else:
             raise Exception('unknow url type<%s>' % url_type)
         return [urls, events]
-    def __various_get_prices(self, place, url_type, page, play_id, event_id):
+    def __various_parse_for_price_infos(self, place, url_type, page, play_id, event_id):
         # 不同建筑的处理方式不同
         # place: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
         # play_id: 演出id，每个演出唯一，在系统中为eid
         # event_id: 事件id，单个演出不同时间不同，在系统中为erid
         if url_type == '选座购票':
             if place in ['国家话剧院先锋剧场', '北京蜂巢剧场']:
-                # 得到的页面应该是seat信息的json
-                try:
-                    seat_info_list = json.loads(page)
-                except Exception as e:
-                    print('[ERROR] 解析座位信息异常[%s]<%s>' % (place, e.__str__()))
-                    return None
-                # 得到seat信息后检查在售票价
-                in_sale = set()
-                total = set()
-                for seat_info in seat_info_list:
-                    fare = seat_info['fare']
-                    status = seat_info['status']
-                    if status == 0:
-                        in_sale.add(fare)
-                    total.add(fare)
-                in_sale_prices = [float(x) for x in list(in_sale)]
-                sold_out_prices = [float(x) for x in list(total - in_sale)]
+                return page
             elif place in ['北京保利剧院']:
                 # http://www.wanshe.cn/orders/findZonings?eid=30016&terminalType=2
                 # 得到的页面应该是包含剧院每层id的json
@@ -347,8 +331,47 @@ class MengJingHui(WebSpider):
                         if status == 0:
                             in_sale.add(fare)
                         total.add(fare)
+                prices_data = {'in_sale_prices': list(in_sale),
+                               'sold_out_prices': list(total - in_sale)}
+                return json.dumps(prices_data)
+            else:
+                raise Exception('unknow place<%s>' % place)
+        elif url_type == '直接购票':
+            if place in ['上海市黄浦剧场']:
+                return page
+            else:
+                raise Exception('unknow place<%s>' % place)
+        else:
+            raise Exception('unknow buy url type<%s>' % url_type)
+    def __various_get_prices(self, place, url_type, page):
+        # 不同建筑的处理方式不同
+        # place: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
+        if url_type == '选座购票':
+            if place in ['国家话剧院先锋剧场', '北京蜂巢剧场']:
+                # 得到的页面应该是seat信息的json
+                try:
+                    seat_info_list = json.loads(page)
+                except Exception as e:
+                    print('[ERROR] 解析座位信息异常[%s]<%s>' % (place, e.__str__()))
+                    return None
+                # 得到seat信息后检查在售票价
+                in_sale = set()
+                total = set()
+                for seat_info in seat_info_list:
+                    fare = seat_info['fare']
+                    status = seat_info['status']
+                    if status == 0:
+                        in_sale.add(fare)
+                    total.add(fare)
                 in_sale_prices = [float(x) for x in list(in_sale)]
                 sold_out_prices = [float(x) for x in list(total - in_sale)]
+            elif place in ['北京保利剧院']:
+                try:
+                    prices_data = json.loads(page)
+                except Exception as e:
+                    print('[ERROR] 解析价格信息异常<%s>' % e.__str__())
+                in_sale_prices = [float(x) for x in prices_data['in_sale_prices']]
+                sold_out_prices = [float(x) for x in prices_data['sold_out_prices']]
             else:
                 raise Exception('unknow place<%s>' % place)
         elif url_type == '直接购票':
@@ -384,14 +407,19 @@ class MengJingHui(WebSpider):
             return None
         urls, events = urls_and_events
 
-        page_lsit = utils.async_get_pages_by_GET(urls)
+        # get page for building infos(or price infos)
+        building_page_lsit = utils.async_get_pages_by_GET(urls)
+
+        # parse building infos for price infos(or just return)
+        page_lsit = [self.__various_parse_for_price_infos(place, url_type, page, 
+            eid, events[i]['event_id']) for i, page in enumerate(building_page_lsit)]
 
         detailed_infos = []
         for i, event in enumerate(events):
             date = event['date']
             time = event['time']
             page = page_lsit[i]
-            prices = self.__various_get_prices(place, url_type, page, eid, event['event_id'])
+            prices = self.__various_get_prices(place, url_type, page)
             if not prices:
                 continue
             [in_sale_prices, sold_out_prices] = prices
