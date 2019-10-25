@@ -1,5 +1,3 @@
-
-
 # showtime
 
 [![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)]() [![release](https://img.shields.io/github/release/barrierye/showtime.svg)]()
@@ -40,10 +38,18 @@ Python3.5+
 
 ## Installation
 
+直接安装（如果你更换了pip源，可能需要加上`-i https://pypi.python.org/simple`参数）
+
+```bash
+pip install show-time
+```
+
+源码安装
+
 ```bash
 pip install wheel
 python setup.py bdist_wheel
-pip install dist/showtime-0.0.0-py3-none-any.whl
+pip install dist/show-time-0.0.0-py3-none-any.whl
 ```
 
 ## Usage

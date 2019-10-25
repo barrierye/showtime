@@ -5,7 +5,7 @@ import re
 from setuptools import setup, find_packages
 
 setup(
-    name = 'showtime',
+    name = 'show-time',
     version = '0.0.0',
     description = 'A spider that crawls the time of various shows.',
     url = 'https://github.com/barrierye/showtime',
