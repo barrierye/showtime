@@ -51,7 +51,7 @@ pip install show-time
 ```bash
 pip install wheel
 python setup.py bdist_wheel
-pip install dist/show-time-0.0.0-py3-none-any.whl
+pip install dist/show-time-0.0.1-py3-none-any.whl
 ```
 
 ## Usage
@@ -127,5 +127,6 @@ TODO
 
 TODO
 
+## Bug
 
-
+如果在使用过程中遇到问题，欢迎在issue中描述问题复现过程。

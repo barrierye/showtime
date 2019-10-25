@@ -6,10 +6,10 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'show-time',
-    version = '0.0.0',
+    version = '0.0.1',
     description = 'A spider that crawls the time of various shows.',
     url = 'https://github.com/barrierye/showtime',
-    keywords = 'show spider',
+    keywords = 'show play spider',
     
     author = 'barriery',
     author_email = 'barriery@qq.com',
