@@ -25,8 +25,8 @@ if __name__ == '__main__':
     # 多进程获取所有资源对应spider的show_list，同时在每个spider内部开线程池
     total_show_list = spider_factory.get_total_show_list(support_sources, is_parallel=True)
 
-    # 打印show_list的简略信息
     for show_list in total_show_list:
+        # 打印show_list的简略信息
         print_info(show_list, rough=True)
         # 将结果存储到本地
         show_list.save('%s.data' % show_list.source)

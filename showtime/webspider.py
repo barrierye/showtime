@@ -238,9 +238,9 @@ class MengJingHui(WebSpider):
         if url_type == '已售罄':
             return None
         elif url_type == '选座购票':
-            page_aid_regex = re.compile(r'<li aid="(?P<erid>\d*?)".*?>'
+            page_erid_regex = re.compile(r'<li aid="(?P<erid>\d*?)".*?>'
                                         r'(?P<date>\d{1,2}-\d{1,2}).*?(?P<time>\d{1,2}:\d{2})</li>')
-            regex_res = page_aid_regex.findall(text)
+            regex_res = page_erid_regex.findall(text)
             events = [{'erid': x[0],
                        'date': '%s-%s'%(utils.judge_this_year(x[1].split('-')[0], x[1].split('-')[1]), x[1]),
                        'time': x[2]} for x in regex_res]
@@ -249,11 +249,19 @@ class MengJingHui(WebSpider):
                                                 'erid': event['erid'],
                                                 'tzid': 0}) for event in events]
         elif url_type == '直接购票':
-            # http://www.wanshe.cn/orders/buy?eid=30940&ufid=0
+            # url: http://www.wanshe.cn/orders/buy?eid=30940&ufid=0
             url = 'http://www.wanshe.cn' + href
-            print('[TODO] 直接购票: ', url)
-            return None
-            #TODO
+            text = self.get_page_by_GET(url)
+            page_erid_regex = re.compile(r'<div class="vcd_crad">.*?<p>(?P<date>\d{1,2}-\d{1,2})'
+                    r'.*?(?P<time>\d{1,2}:\d{2})</p>.*?<input.*?value="(?P<erid>\d*?)"', re.DOTALL)
+            regex_res = page_erid_regex.findall(text)
+            events = [{'date': '%s-%s'%(utils.judge_this_year(x[0].split('-')[0], x[0].split('-')[1]), x[0]),
+                       'time': x[1],
+                       'erid': x[2]} for x in regex_res]
+            # 虽然抓到的包是POST方法，但是测试了下用GET加参数也是可以的
+            base_url = 'http://www.wanshe.cn/orders/getRepeatTicketList'
+            urls = [base_url + '?' + urlencode({'eid': eid,
+                                                'epid': event['erid']}) for event in events]
         else:
             raise Exception('unknow url type<%s>' % url_type)
         return [urls, events]
@@ -262,7 +270,7 @@ class MengJingHui(WebSpider):
             try:
                 seat_info_list = json.loads(page)
             except Exception as e:
-                print('[TODO] 暂时不支持该种选座页面')
+                print('[TODO] 暂时不支持该种选座页面<%s>' % e.__str__())
                 return None
             in_sale = set()
             total = set()
@@ -275,8 +283,18 @@ class MengJingHui(WebSpider):
             in_sale_prices = [float(x) for x in list(in_sale)]
             sold_out_prices = [float(x) for x in list(total - in_sale)]
         elif url_type == '直接购票':
-            return None
-            #TODO
+            try:
+                ticket_info_list = json.loads(page)['ticket']
+            except Exception as e:
+                print('[ERROR] 未知异常<%s>' % e.__str__())
+                return None
+            in_sale_prices = []
+            sold_out_prices = []
+            for info in ticket_info_list:
+                if info['status'] == 1:
+                    in_sale_prices.append(float(info['price']))
+                else:
+                    sold_out_prices.append(float(info['price']))
         else:
             raise Exception('unknow url type<%s>' % url_type)
         return [in_sale_prices, sold_out_prices]
@@ -298,7 +316,7 @@ class MengJingHui(WebSpider):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         tasks = [utils.async_get_page_by_GET(url, index, page_lsit) \
-                for index, url in enumerate(urls)]
+                    for index, url in enumerate(urls)]
         loop.run_until_complete(asyncio.wait(tasks))
         page_lsit.sort(key=lambda e: e[0])
         
@@ -309,7 +327,7 @@ class MengJingHui(WebSpider):
             page = page_lsit[i][1]
             prices = self.__various_get_prices(url_type, page)
             if not prices:
-                return None
+                continue
             [in_sale_prices, sold_out_prices] = prices
             detailed_infos.append({'date': date,
                                    'time': time,

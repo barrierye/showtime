@@ -1,6 +1,6 @@
 # showtime
 
-[![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)]() [![release](https://img.shields.io/github/v/tag/barrierye/showtime?label=release)]()
+[![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)](https://github.com/barrierye/showtime#requirements) [![release](https://img.shields.io/github/v/tag/barrierye/showtime?label=release)](https://github.com/barrierye/showtime/releases)
 
 用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，__生活需要一点情调__。
 
@@ -79,14 +79,14 @@ if __name__ == '__main__':
     # 多进程获取所有资源对应spider的show_list，同时在每个spider内部开线程池
     total_show_list = spider_factory.get_total_show_list(support_sources, is_parallel=True)
 
-    # 打印show_list的简略信息
     for show_list in total_show_list:
+        # 打印show_list的简略信息
         print_info(show_list, rough=True)
         # 将结果存储到本地
         show_list.save('%s.data' % show_list.source)
 ```
 
-## Contribute code
+## Contribution
 
 如果支持信息来源列表中没有你需要的，你可以根据下面的文档进行拓展开发，并提交PR贡献代码。
 
