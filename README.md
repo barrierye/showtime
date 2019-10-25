@@ -1,6 +1,6 @@
 # showtime
 
-[![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)]() [![release](https://img.shields.io/github/release/barrierye/showtime.svg)]()
+[![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)]() [![release](https://img.shields.io/github/v/tag/barrierye/showtime?label=release)]()
 
 用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，__生活需要一点情调__。
 
