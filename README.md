@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
 ![](https://tva1.sinaimg.cn/large/006y8mN6gy1g87bdn9ix7j30lp0gwjre.jpg)
 
-信息来源为Web的爬虫类需要继承WebSpider基类，WebSpider提供了一些默认方法和多进程支持。
+信息来源为Web的爬虫类需要继承WebSpider基类，WebSpider提供了一些默认方法和并行支持。
 
 WebSpider是这样工作的：
 1. 通过`_get_rough_url_list`方法获取简略的url列表`rough_url_list`，从这些url中可以得到每场演出的名称和具体信息的url。

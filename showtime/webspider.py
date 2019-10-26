@@ -2,6 +2,7 @@
 # Copyright (c) 2019 barriery
 # Python release: 3.7.0
 import re
+import bs4
 import sys
 import html
 import json
@@ -234,33 +235,49 @@ class MengJingHui(WebSpider):
         for play in play_list:
             rough_infos.append({v: play[k] for k, v in params_mapping.items() if v is not None})
         return rough_infos
-    def __various_get_urls_and_events(self, place, href, url_type, text, play_id):
+    def __various_get_urls_and_events(self, address, href, buy_type, html, play_id):
         # 不同建筑的处理方式不同
-        # place: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
+        # address: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
         # play_id: 演出id，每个演出唯一，在系统中为eid
-        if url_type == '已售罄':
+        if buy_type == '已售罄':
             return None
-        elif url_type == '选座购票':
-            if place in ['国家话剧院先锋剧场','北京蜂巢剧场']:
-                page_erid_regex = re.compile(r'<li aid="(?P<erid>\d*?)".*?>'
-                                            r'(?P<date>\d{1,2}-\d{1,2}).*?(?P<time>\d{1,2}:\d{2})</li>')
-                regex_res = page_erid_regex.findall(text)
-                events = [{'event_id': x[0],
-                           'date': '%s-%s'%(utils.judge_this_year(x[1].split('-')[0], x[1].split('-')[1]), x[1]),
-                           'time': x[2]} for x in regex_res]
+        elif buy_type == '选座购票':
+            if address in ['国家话剧院先锋剧场','北京蜂巢剧场']:
+                dateTime = html.find('', {'class': 'dateTime'})
+                date_list = dateTime.find_all('li')
+                events = []
+                for item in date_list:
+                    if 'aid' in item.attrs:
+                        event_id = item.attrs['aid']
+                        date_and_time = item.string.strip()
+                        date_regex = re.compile(r'\d{1,2}-\d{1,2}')
+                        time_regex = re.compile(r'\d{1,2}:\d{2}')
+                        date = date_regex.findall(date_and_time)[0]
+                        time = time_regex.findall(date_and_time)[0]
+                        events.append({'event_id': event_id,
+                                       'date': '%s-%s'%(utils.judge_this_year(date.split('-')[0], date.split('-')[1]), date),
+                                       'time': time})
                 # 仅一层，从下面的url中可以获取座位信息
                 # 选座购票 -> querySeatMap(获取座位信息)
                 base_url = 'http://www.wanshe.cn/orders/querySeatMap'
                 urls = [base_url + '?' + urlencode({'eid': play_id,
                                                     'erid': event['event_id'],
                                                     'tzid': 0}) for event in events]
-            elif place in ['北京保利剧院']:
-                page_erid_regex = re.compile(r'<li aid="(?P<erid>\d*?)".*?>'
-                                            r'(?P<date>\d{1,2}-\d{1,2}).*?(?P<time>\d{1,2}:\d{2})</li>')
-                regex_res = page_erid_regex.findall(text)
-                events = [{'event_id': x[0],
-                           'date': '%s-%s'%(utils.judge_this_year(x[1].split('-')[0], x[1].split('-')[1]), x[1]),
-                           'time': x[2]} for x in regex_res]
+            elif address in ['北京保利剧院']:
+                dateTime = html.find('', {'class': 'dateTime'})
+                date_list = dateTime.find_all('li')
+                events = []
+                for item in date_list:
+                    if 'aid' in item.attrs:
+                        event_id = item.attrs['aid']
+                        date_and_time = item.string.strip()
+                        date_regex = re.compile(r'\d{1,2}-\d{1,2}')
+                        time_regex = re.compile(r'\d{1,2}:\d{2}')
+                        date = date_regex.findall(date_and_time)[0]
+                        time = time_regex.findall(date_and_time)[0]
+                        events.append({'event_id': event_id,
+                                       'date': '%s-%s'%(utils.judge_this_year(date.split('-')[0], date.split('-')[1]), date),
+                                       'time': time})
                 # http://www.wanshe.cn/orders/findZonings?eid=30016&terminalType=2
                 # 北京保利剧院有若干个区域，可以从这个url中获取每层tzid
                 # 选座购票 -> findZonings(获取建筑信息) -> querySeatMap(获取座位信息, 在后续操作)
@@ -268,43 +285,49 @@ class MengJingHui(WebSpider):
                 urls = [base_url + '?' + urlencode({'eid': play_id,
                                                     'terminalType': 2}) for event in events]
             else:
-                raise Exception('unknow place<%s>' % place)
-        elif url_type == '直接购票':
-            if place in ['上海市黄浦剧场']:
+                raise Exception('unknow address<%s>' % address)
+        elif buy_type == '直接购票':
+            if address in ['上海市黄浦剧场']:
                 # url: http://www.wanshe.cn/orders/buy?eid=30940&ufid=0
                 url = 'http://www.wanshe.cn' + href
                 text = self.get_page_by_GET(url)
-                page_erid_regex = re.compile(r'<div class="vcd_crad">.*?<p>(?P<date>\d{1,2}-\d{1,2})'
-                        r'.*?(?P<time>\d{1,2}:\d{2})</p>.*?<input.*?value="(?P<erid>\d*?)"', re.DOTALL)
-                regex_res = page_erid_regex.findall(text)
-                events = [{'date': '%s-%s'%(utils.judge_this_year(x[0].split('-')[0], x[0].split('-')[1]), x[0]),
-                           'time': x[1],
-                           'event_id': x[2]} for x in regex_res]
+                html = bs4.BeautifulSoup(text, 'lxml')
+                timecon = html.find_all('', {'class': 'timecon'})[0]
+                date_list = timecon.find_all('', {'class': 'vcd_crad'})
+                events = []
+                for item in date_list:
+                    date_and_time = item.find_all('p')
+                    date = date_and_time[0].string.strip()
+                    time = date_and_time[1].string.strip().split()[-1]
+                    event_id = item.input.attrs['value']
+                    events.append({'event_id': event_id,
+                                   'date': '%s-%s'%(utils.judge_this_year(date.split('-')[0], date.split('-')[1]), date),
+                                   'time': time})
                 # 虽然抓到的包是POST方法，但是测试了下用GET加参数也是可以的
                 base_url = 'http://www.wanshe.cn/orders/getRepeatTicketList'
                 urls = [base_url + '?' + urlencode({'eid': play_id,
                                                     'epid': event['event_id']}) for event in events]
             else:
-                raise Exception('unknow place<%s>' % place)
+                raise Exception('unknow address<%s>' % address)
         else:
-            raise Exception('unknow url type<%s>' % url_type)
+            raise Exception('unknow url type<%s>' % buy_type)
         return [urls, events]
-    def __various_parse_for_price_infos(self, place, url_type, page, play_id, event_id):
+    def __various_parse_for_price_infos(self, address, buy_type, page, play_id, event_id):
         # 不同建筑的处理方式不同
-        # place: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
+        # address: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
         # play_id: 演出id，每个演出唯一，在系统中为eid
         # event_id: 事件id，单个演出不同时间不同，在系统中为erid
-        if url_type == '选座购票':
-            if place in ['国家话剧院先锋剧场', '北京蜂巢剧场']:
+        if buy_type == '选座购票':
+            if address in ['国家话剧院先锋剧场', '北京蜂巢剧场']:
                 return page
-            elif place in ['北京保利剧院']:
+            elif address in ['北京保利剧院']:
                 # http://www.wanshe.cn/orders/findZonings?eid=30016&terminalType=2
                 # 得到的页面应该是包含剧院每层id的json
                 # findZonings(获取建筑信息)
                 try:
                     building_info_list = json.loads(page)['zonings']
                 except Exception as e:
-                    print('[ERROR] 解析建筑信息异常[%s]<%s>' % (place, e.__str__()))
+                    print('[ERROR] 解析建筑信息异常[%s]<%s>' % (address, e.__str__()))
                     return None
                 seat_info_urls = []
                 for building_info in building_info_list:
@@ -335,24 +358,24 @@ class MengJingHui(WebSpider):
                                'sold_out_prices': list(total - in_sale)}
                 return json.dumps(prices_data)
             else:
-                raise Exception('unknow place<%s>' % place)
-        elif url_type == '直接购票':
-            if place in ['上海市黄浦剧场']:
+                raise Exception('unknow address<%s>' % address)
+        elif buy_type == '直接购票':
+            if address in ['上海市黄浦剧场']:
                 return page
             else:
-                raise Exception('unknow place<%s>' % place)
+                raise Exception('unknow address<%s>' % address)
         else:
-            raise Exception('unknow buy url type<%s>' % url_type)
-    def __various_get_prices(self, place, url_type, page):
+            raise Exception('unknow buy url type<%s>' % buy_type)
+    def __various_get_prices(self, address, buy_type, page):
         # 不同建筑的处理方式不同
-        # place: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
-        if url_type == '选座购票':
-            if place in ['国家话剧院先锋剧场', '北京蜂巢剧场']:
+        # address: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
+        if buy_type == '选座购票':
+            if address in ['国家话剧院先锋剧场', '北京蜂巢剧场']:
                 # 得到的页面应该是seat信息的json
                 try:
                     seat_info_list = json.loads(page)
                 except Exception as e:
-                    print('[ERROR] 解析座位信息异常[%s]<%s>' % (place, e.__str__()))
+                    print('[ERROR] 解析座位信息异常[%s]<%s>' % (address, e.__str__()))
                     return None
                 # 得到seat信息后检查在售票价
                 in_sale = set()
@@ -365,7 +388,7 @@ class MengJingHui(WebSpider):
                     total.add(fare)
                 in_sale_prices = [float(x) for x in list(in_sale)]
                 sold_out_prices = [float(x) for x in list(total - in_sale)]
-            elif place in ['北京保利剧院']:
+            elif address in ['北京保利剧院']:
                 try:
                     prices_data = json.loads(page)
                 except Exception as e:
@@ -373,13 +396,13 @@ class MengJingHui(WebSpider):
                 in_sale_prices = [float(x) for x in prices_data['in_sale_prices']]
                 sold_out_prices = [float(x) for x in prices_data['sold_out_prices']]
             else:
-                raise Exception('unknow place<%s>' % place)
-        elif url_type == '直接购票':
-            if place in ['上海市黄浦剧场']:
+                raise Exception('unknow address<%s>' % address)
+        elif buy_type == '直接购票':
+            if address in ['上海市黄浦剧场']:
                 try:
                     ticket_info_list = json.loads(page)['ticket']
                 except Exception as e:
-                    print('[ERROR] 解析票据信息异常[%s]<%s>' % (place, e.__str__()))
+                    print('[ERROR] 解析票据信息异常[%s]<%s>' % (address, e.__str__()))
                     return None
                 in_sale_prices = []
                 sold_out_prices = []
@@ -389,20 +412,24 @@ class MengJingHui(WebSpider):
                     else:
                         sold_out_prices.append(float(info['price']))
             else:
-                raise Exception('unknow place<%s>' % place)
+                raise Exception('unknow address<%s>' % address)
         else:
-            raise Exception('unknow buy url type<%s>' % url_type)
+            raise Exception('unknow buy url type<%s>' % buy_type)
         return [in_sale_prices, sold_out_prices]
     def _get_detailed_page(self, url):
         # 由于网站比较特殊，故在这里完成get和parse，并返回一个json_str
         eid = url.split('/')[-1]
 
         text = self.get_page_by_GET(url)
-        url_type_regex = re.compile(r'<p class="address"><a href=".*?">(?P<place>.*?)</a>.*?'
-                                    r'<li>不同场次以现有价格为准.*?<a href="(?P<href>.*?)">'
-                                    r'(?P<url_type>.*?)</a>.*?<div class="tgbg">', re.DOTALL)
-        place, href, url_type = url_type_regex.findall(text)[0]
-        urls_and_events = self.__various_get_urls_and_events(place, href, url_type, text, eid)
+        html = bs4.BeautifulSoup(text,'lxml')
+        info = html.find('', {'class': 'info'})
+        #  title = info.find('', {'class': 'title'}).string.strip()
+        address = info.find('', {'class': 'address'}).string.strip()
+        buy_button = html.find('', {'class': 'view_sigpnup'}).a
+        buy_href = buy_button.attrs['href']
+        buy_type = buy_button.string.strip()
+
+        urls_and_events = self.__various_get_urls_and_events(address, buy_href, buy_type, html, eid)
         if urls_and_events is None:
             return None
         urls, events = urls_and_events
@@ -411,7 +438,7 @@ class MengJingHui(WebSpider):
         building_page_lsit = utils.async_get_pages_by_GET(urls)
 
         # parse building infos for price infos(or just return)
-        page_lsit = [self.__various_parse_for_price_infos(place, url_type, page, 
+        page_lsit = [self.__various_parse_for_price_infos(address, buy_type, page, 
             eid, events[i]['event_id']) for i, page in enumerate(building_page_lsit)]
 
         detailed_infos = []
@@ -419,7 +446,7 @@ class MengJingHui(WebSpider):
             date = event['date']
             time = event['time']
             page = page_lsit[i]
-            prices = self.__various_get_prices(place, url_type, page)
+            prices = self.__various_get_prices(address, buy_type, page)
             if not prices:
                 continue
             [in_sale_prices, sold_out_prices] = prices
