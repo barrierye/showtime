@@ -39,7 +39,10 @@ class ShowSpiderFactory(object):
 
     def get_total_show_list(self, source_list, is_parallel=True, process_num=None):
         pnum = utils.get_process_num(is_parallel, process_num, len(source_list))
-        pool = multiprocessing.Pool(processes=pnum)
-        total_show_list = pool.map(self.get_show_list, source_list)
-        pool.close()
+        if pnum == 1:
+            total_show_list = [self.get_show_list(source, is_parallel=is_parallel) for source in source_list]
+        else:
+            pool = multiprocessing.Pool(processes=pnum)
+            total_show_list = pool.map(self.get_show_list, source_list)
+            pool.close()
         return total_show_list
