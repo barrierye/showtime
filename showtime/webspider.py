@@ -83,6 +83,22 @@ class WebSpider(object):
             pool.close()
         showlist.add_shows([show_type.Show(info) for info in rough_show_infos])
 
+        # Some webspider can get detailed infos in rough page.
+        # Here check the information of a here to decide whether to proceed to the next step
+        is_get_detailed_info = True
+        for show in showlist:
+            if not show.check_rough_info(['date', 'time', 'city', 'url', \
+                    'address', 'in_sale_prices', 'sold_out_prices']):
+                is_get_detailed_info = False
+                break
+        if is_get_detailed_info:
+            for i, show in enumerate(showlist):
+                detailed_info = {'url': show.url}
+                utils.padding_dict(show.extra_fields, detailed_info,
+                        ['date', 'time', 'city', 'address', 'in_sale_prices', 'sold_out_prices'])
+                showlist[i].add_event(detailed_info)
+            return showlist
+
         # get detailed infos
         tnum = utils.get_process_num(is_parallel, thread_num, len(showlist))
         need_be_del = []
@@ -202,6 +218,62 @@ class BeihangSunriseConcertHall(WebSpider):
             detailed_infos[i]['sold_out_prices'] = []
             detailed_infos[i].pop('total_price')
         return detailed_infos
+
+class PKUHall(WebSpider):
+    source = 'PKUHall'
+    def __init__(self):
+        super(PKUHall, self).__init__()
+        self._home_url = 'http://www.pku-hall.com'
+    def _get_rough_url_list(self):
+        return [self._home_url + '/pwxx.aspx']
+    def __parse_for_prices(self, price_info):
+        in_sale = price_info.find('span')
+        sold_out = price_info.find_all('s')
+        special_prices = set()
+        total_prices = set()
+        sold_out_prices = set()
+        price_regex = re.compile(r'\d+')
+        for p in in_sale.stripped_strings:
+            prices = price_regex.findall(p)
+            if '（凭北京大学校园卡购买）' in p:
+                sp = p.split('（凭北京大学校园卡购买）')[0]
+                special_prices.update(price_regex.findall(sp))
+            total_prices.update(price_regex.findall(p))
+        for x in sold_out:
+            p = x.string
+            if '（凭北京大学校园卡购买）' in p:
+                sp = p.split('（凭北京大学校园卡购买）')[0]
+                special_prices.update(price_regex.findall(sp))
+            prices = price_regex.findall(p)
+            total_prices.update(prices)
+            sold_out_prices.update(prices)
+        return ([float(x) for x in special_prices],
+                [float(x) for x in total_prices-sold_out_prices],
+                [float(x) for x in sold_out_prices])
+    def _parse_for_rough_info(self, text):
+        html = bs4.BeautifulSoup(text, 'lxml')
+        table = html.tbody.find_all('tr')
+        infos = []
+        for item in table:
+            info = item.find_all('td')
+            date = info[0].string.strip()
+            #  week = info[1].string.strip()
+            time = info[2].string.strip()
+            address = info[3].string.strip()
+            url = self._home_url + '/' + info[4].a.attrs['href']
+            name = info[4].a.string.strip()
+            special_price, in_sale, sold_out = self.__parse_for_prices(info[5])
+            #  status = info[6].string.strip()
+            infos.append({'name': name,
+                          'url': url,
+                          'date': date,
+                          'time': time,
+                          'city': '北京',
+                          'address': address,
+                          'in_sale_prices': in_sale,
+                          'sold_out_prices': sold_out,
+                          'special_price': special_price})
+        return infos
 
 class MengJingHui(WebSpider):
     source = 'MengJingHuiWebsite'
@@ -386,8 +458,8 @@ class MengJingHui(WebSpider):
                     if status == 0:
                         in_sale.add(fare)
                     total.add(fare)
-                in_sale_prices = [float(x) for x in list(in_sale)]
-                sold_out_prices = [float(x) for x in list(total - in_sale)]
+                in_sale_prices = [float(x) for x in in_sale]
+                sold_out_prices = [float(x) for x in total-in_sale]
             elif address in ['北京保利剧院']:
                 try:
                     prices_data = json.loads(page)

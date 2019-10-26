@@ -9,8 +9,8 @@
 - 支持多种信息来源，支持列表：
   - [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
   - [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
-  - [ ] 中国电影资料馆 [https://www.cfa.org.cn](https://www.cfa.org.cn/)
-  - [ ] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
+  - [ ] 永乐票务 [https://www.228.com.cn](https://www.228.com.cn/)
+  - [x] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
   - [ ] 蜂巢剧场官网 [http://www.fengchaojuchang.org.cn](http://www.fengchaojuchang.org.cn/)
   - [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
   - [ ] 大麦 [APP]

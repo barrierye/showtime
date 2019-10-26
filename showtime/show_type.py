@@ -27,23 +27,23 @@ class ShowList(list):
     def add_shows(self, shows):
         for show in shows:
             self.add_show(show)
-    def gen_proto(self):
+    def gen_proto(self, without_extra_fields):
         if self.proto is not None:
             return self.proto
         self.proto = show_type_pb2.ShowList()
         self.proto.source = self.source
         for show in self:
-            self.proto.shows.append(show.gen_proto())
+            self.proto.shows.append(show.gen_proto(without_extra_fields))
         return self.proto
-    def save(self, filename, display_chinese=True):
+    def save(self, filename, display_chinese=True, without_extra_fields=True):
         ''' save data to filename human-friendly '''
-        self.gen_proto()
+        self.gen_proto(without_extra_fields)
         with open(filename, 'w') as f:
             # set as_utf8 to True can correctly displays Chinese characters
             # see: https://github.com/protocolbuffers/protobuf/issues/4062
             f.write(text_format.MessageToString(self.proto, as_utf8=display_chinese))
-    def serialize_save(self, filename):
-        self.gen_proto()
+    def serialize_save(self, filename, without_extra_fields=False):
+        self.gen_proto(without_extra_fields)
         with open(filename, 'wb') as f:
             f.write(self.proto.SerializeToString())
     @staticmethod
@@ -88,6 +88,13 @@ class Show(list):
         for param in requested_params:
             params.pop(param)
         self.extra_fields = params
+    def check_rough_info(self, check_params_list):
+        for param in check_params_list:
+            if param == 'url':
+                continue
+            if self.extra_fields.get(param) is None:
+                return False
+        return True
     def add_event(self, detailed_info):
         """向Show中添加一个场次
         Args:
@@ -100,14 +107,15 @@ class Show(list):
             self.add_event(info)
     def __str__(self):
         return '[%s] %s' % (self.name, self.url)
-    def gen_proto(self):
+    def gen_proto(self, without_extra_fields):
         proto = show_type_pb2.Show()
         proto.name = self.name
         proto.url = self.url
-        for key, value in self.extra_fields.items():
-            proto.extra_fields[key] = value
+        if not without_extra_fields:
+            for key, value in self.extra_fields.items():
+                proto.extra_fields[key] = str(value)
         for event in self:
-            proto.events.append(event.gen_proto())
+            proto.events.append(event.gen_proto(without_extra_fields))
         return proto
     @staticmethod
     def parse_from_proto(proto):
@@ -200,7 +208,7 @@ class Event(dict):
         for item, value in self.items():
             info_str += '<%s>: %s\n' % (item, str(value))
         return info_str
-    def gen_proto(self):
+    def gen_proto(self, without_extra_fields):
         proto = show_type_pb2.Event()
         proto.date = self['date']
         proto.time = self['time']
@@ -209,8 +217,9 @@ class Event(dict):
         proto.address = self['address']
         proto.prices.in_sale.extend(self['in_sale_prices'])
         proto.prices.sold_out.extend(self['sold_out_prices'])
-        for key, value in self.extra_fields.items():
-            proto.extra_fields[key] = value
+        if not without_extra_fields:
+            for key, value in self.extra_fields.items():
+                proto.extra_fields[key] = str(value)
         return proto
     @staticmethod
     def parse_from_proto(proto):
