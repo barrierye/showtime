@@ -21,16 +21,38 @@
 
 - 支持简单的本地存储/加载功能
 
-  为了使得数据清晰简单，采用protobuf支持human-friendly/序列化存储。
-
-## TODO
-
-1. 为了项目的可持续发展，需要尽快完善注释和文档（资源种类太多，且每种资源的一些设定还是异构的）。
-3. 支持尚未支持的Web信息来源
-4. 频繁爬取数据，服务器拒绝访问&&偶尔会崩
-5. 思考AppSpider的基类架构
-6. 思考AppletSpider的基类架构
-7. 支持北航晨兴音乐厅的线上预定
+  为了使得数据清晰简单，采用protobuf支持human-friendly/序列化存储，数据格式：
+  
+  ```protobuf
+  syntax = "proto3";
+  
+  message ShowList {
+    string source = 1;
+    repeated Show shows = 2;
+  }
+  
+  message Show {
+    string name = 1;
+    string url = 2;
+    repeated Event events = 3;
+    map<string, string> extra_fields = 4;
+  }
+  
+  message Event {
+    string date = 1; // YYYY-mm-dd
+    string time = 2; // HH:MM
+    string url = 3; // http-url or https-url
+    string city = 4; // 34个省级行政区域以及一线，新一线和二线城市，不带'省'和'市'等后缀，2-3个字
+    string address = 5;
+    Price prices = 6;
+    map<string, string> extra_fields = 7;
+  }
+  
+  message Price {
+    repeated float in_sale = 1;
+    repeated float sold_out = 2;
+  }
+  ```
 
 ## Requirements
 
@@ -128,3 +150,12 @@ TODO
 ## Bug
 
 如果在使用过程中遇到问题，欢迎在issue中描述问题复现过程。
+
+## TODO
+
+1. 为了项目的可持续发展，需要尽快完善注释和文档（资源种类太多，且每种资源的一些设定还是异构的）。
+2. 支持尚未支持的Web信息来源
+3. 频繁爬取数据，服务器拒绝访问&&偶尔会崩
+4. 思考AppSpider的基类架构
+5. 思考AppletSpider的基类架构
+6. 支持北航晨兴音乐厅的线上预定
