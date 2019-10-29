@@ -71,7 +71,7 @@ pip install show-time
 ```bash
 pip install wheel
 python setup.py bdist_wheel
-pip install dist/show-time-0.0.2-py3-none-any.whl
+pip install dist/show-time-0.0.3-py3-none-any.whl
 ```
 
 ## Usage

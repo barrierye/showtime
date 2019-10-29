@@ -4,15 +4,14 @@
 import re
 from setuptools import setup, find_packages
 
-with open('README.md', 'r') as f:
+with open('README.rst', 'r') as f:
     long_description = f.read()
 
 setup(
     name = 'show-time',
-    version = '0.0.2',
+    version = '0.0.3',
     description = 'A spider that crawls the time of various shows.',
     long_description = long_description,
-    long_description_content_type = 'text/markdown',
     url = 'https://github.com/barrierye/showtime',
     keywords = 'show play spider',
     
