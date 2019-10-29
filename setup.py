@@ -4,10 +4,15 @@
 import re
 from setuptools import setup, find_packages
 
+with open('README.md', 'r') as f:
+    long_description = f.read()
+
 setup(
     name = 'show-time',
     version = '0.0.2',
     description = 'A spider that crawls the time of various shows.',
+    long_description = long_description,
+    long_description_content_type = 'text/markdown',
     url = 'https://github.com/barrierye/showtime',
     keywords = 'show play spider',
     
@@ -27,6 +32,10 @@ setup(
         'requests==2.22.0',
         'protobuf==3.10.0',
     ],
+
+    classifiers = [
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License'],
 
     packages = find_packages(where='.'),
 )
