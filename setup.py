@@ -1,24 +1,25 @@
 #-*- coding:utf8 -*-
 # Copyright (c) 2019 barriery
 # Python release: 3.7.0
-import re
 from setuptools import setup, find_packages
 
-with open('README.rst', 'r') as f:
-    long_description = f.read()
+with open('README.md', 'r') as f:
+    README = f.read()
 
 setup(
-    name = 'show-time',
-    version = '0.0.3',
-    description = 'A spider that crawls the time of various shows.',
-    long_description = long_description,
-    url = 'https://github.com/barrierye/showtime',
-    keywords = 'show play spider',
+    name='show-time',
+    version='0.0.3',
+    description='A spider that crawls the time of various shows.',
+    long_description=README,
+    long_description_content_type="text/markdown",
+    url='https://github.com/barrierye/showtime',
+    keywords='show play spider',
     
-    author = 'barriery',
-    author_email = 'barriery@qq.com',
-    maintainer = 'barriery',
-    maintainer_email = 'barriery@qq.com',
+    author='barriery',
+    author_email='barriery@qq.com',
+    maintainer='barriery',
+    maintainer_email='barriery@qq.com',
+    license='MIT'
 
     include_package_data=True,
 

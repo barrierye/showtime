@@ -9,6 +9,7 @@
 - 支持多种信息来源，支持列表：
   - [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
   - [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
+  - [ ] 票虫网 [http://www.piaochong.com](http://www.piaochong.com/)
   - [ ] 永乐票务 [https://www.228.com.cn](https://www.228.com.cn/)
   - [x] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
   - [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)

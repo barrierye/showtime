@@ -9,6 +9,7 @@ import json
 import asyncio
 import aiohttp
 import requests
+import logging
 import multiprocessing
 import multiprocessing.dummy
 from urllib.parse import urlencode
@@ -18,6 +19,8 @@ from urllib.parse import urlencode
 # webspider classes.
 from showtime import show_type
 from showtime import utils
+
+_LOGGER = logging.getLogger(__name__)
 
 class WebSpider(object):
     # # PAY ATTITION THAT `source` need be rewrite
@@ -335,7 +338,7 @@ class MengJingHui(WebSpider):
                 urls = [base_url + '?' + urlencode({'eid': play_id,
                                                     'erid': event['event_id'],
                                                     'tzid': 0}) for event in events]
-            elif address in ['北京保利剧院']:
+            elif address in ['北京保利剧院', '保利剧院']:
                 dateTime = html.find('', {'class': 'dateTime'})
                 date_list = dateTime.find_all('li')
                 events = []
@@ -392,14 +395,14 @@ class MengJingHui(WebSpider):
         if buy_type == '选座购票':
             if address in ['国家话剧院先锋剧场', '北京蜂巢剧场']:
                 return page
-            elif address in ['北京保利剧院']:
+            elif address in ['北京保利剧院', '保利剧院']:
                 # http://www.wanshe.cn/orders/findZonings?eid=30016&terminalType=2
                 # 得到的页面应该是包含剧院每层id的json
                 # findZonings(获取建筑信息)
                 try:
                     building_info_list = json.loads(page)['zonings']
                 except Exception as e:
-                    print('[ERROR] 解析建筑信息异常[%s]<%s>' % (address, e.__str__()))
+                    _LOGGER.error('解析建筑信息异常[%s]<%s>', address, e.__str__())
                     return None
                 seat_info_urls = []
                 for building_info in building_info_list:
@@ -419,7 +422,7 @@ class MengJingHui(WebSpider):
                     try:
                         seat_info_list = json.loads(page)
                     except Exception as e:
-                        print('[ERROR] 解析座位信息异常<%s>' % e.__str__())
+                        _LOGGER.error('解析座位信息异常<%s>', e.__str__())
                     for seat_info in seat_info_list:
                         fare = seat_info['fare']
                         status = seat_info['status']
@@ -447,7 +450,7 @@ class MengJingHui(WebSpider):
                 try:
                     seat_info_list = json.loads(page)
                 except Exception as e:
-                    print('[ERROR] 解析座位信息异常[%s]<%s>' % (address, e.__str__()))
+                    _LOGGER.error('解析座位信息异常[%s]<%s>', address, e.__str__())
                     return None
                 # 得到seat信息后检查在售票价
                 in_sale = set()
@@ -460,11 +463,11 @@ class MengJingHui(WebSpider):
                     total.add(fare)
                 in_sale_prices = [float(x) for x in in_sale]
                 sold_out_prices = [float(x) for x in total-in_sale]
-            elif address in ['北京保利剧院']:
+            elif address in ['北京保利剧院', '保利剧院']:
                 try:
                     prices_data = json.loads(page)
                 except Exception as e:
-                    print('[ERROR] 解析价格信息异常<%s>' % e.__str__())
+                    _LOGGER.error('解析价格信息异常<%s>', e.__str__())
                 in_sale_prices = [float(x) for x in prices_data['in_sale_prices']]
                 sold_out_prices = [float(x) for x in prices_data['sold_out_prices']]
             else:
@@ -474,7 +477,7 @@ class MengJingHui(WebSpider):
                 try:
                     ticket_info_list = json.loads(page)['ticket']
                 except Exception as e:
-                    print('[ERROR] 解析票据信息异常[%s]<%s>' % (address, e.__str__()))
+                    _LOGGER.error('解析票据信息异常[%s]<%s>', address, e.__str__())
                     return None
                 in_sale_prices = []
                 sold_out_prices = []
@@ -492,6 +495,7 @@ class MengJingHui(WebSpider):
         # 由于网站比较特殊，故在这里完成get和parse，并返回一个json_str
         eid = url.split('/')[-1]
 
+        _LOGGER.debug('[_get_detailed_page] url: %s', url)
         text = self.get_page_by_GET(url)
         html = bs4.BeautifulSoup(text,'lxml')
         info = html.find('', {'class': 'info'})
