@@ -28,6 +28,8 @@ class WebSpider(object):
     def __init__(self):
         self._session = self._get_http_session(pool_maxsize=multiprocessing.cpu_count(), max_retries=3)
     def _get_http_session(self, pool_maxsize, max_retries):
+        # the defulat pool_maxsize is 10, if thread number > pool_maxsize:
+        # WARNING:urllib3.connectionpool:Connection pool is full, discarding connection
         session = requests.Session()
         # 创建一个适配器，最大数量pool_maxsize, 失败重试的次数max_retries
         adapter = requests.adapters.HTTPAdapter(pool_maxsize=pool_maxsize, max_retries=max_retries)

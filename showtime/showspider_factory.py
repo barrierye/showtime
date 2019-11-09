@@ -41,7 +41,7 @@ class ShowSpiderFactory(object):
         timer = utils.TimeRecorder()
         showlist = self.get_spider(source).get_show_list(is_parallel, thread_num)
         timer.release()
-        _LOGGER.info('[%s] time without sleep: %f', source, timer.count_without_sleep())
+        #  _LOGGER.info('[%s] time without sleep: %f', source, timer.count_without_sleep())
         _LOGGER.info('[%s] time: %f', source, timer.count())
         return showlist
 
@@ -57,6 +57,6 @@ class ShowSpiderFactory(object):
             pool.close()
     
         timer.release()
-        _LOGGER.info('total time without sleep: %f', timer.count_without_sleep())
+        #  _LOGGER.info('total time without sleep: %f', timer.count_without_sleep())
         _LOGGER.info('total time: %f', timer.count())
         return total_show_list

@@ -20,7 +20,7 @@ def load_file(filename):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
-    data_path = 'showtime_data'
+    data_path = 'data'
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
