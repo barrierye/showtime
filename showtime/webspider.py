@@ -23,10 +23,18 @@ from showtime import utils
 _LOGGER = logging.getLogger(__name__)
 
 class WebSpider(object):
-    # # PAY ATTITION THAT `source` need be rewrite
+    # PAY ATTITION THAT `source` need be rewrite
     source = None
     def __init__(self):
-        self._session = requests.Session()
+        self._session = self._get_http_session(pool_maxsize=multiprocessing.cpu_count(), max_retries=3)
+    def _get_http_session(self, pool_maxsize, max_retries):
+        session = requests.Session()
+        # 创建一个适配器，最大数量pool_maxsize, 失败重试的次数max_retries
+        adapter = requests.adapters.HTTPAdapter(pool_maxsize=pool_maxsize, max_retries=max_retries)
+        # http/https都使用这个适配器
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        return session
     def _get_default_header(self, browser_type='Chrome'):
         header = None
         if browser_type == 'Chrome':
@@ -88,18 +96,17 @@ class WebSpider(object):
 
         # Some webspider can get detailed infos in rough page.
         # Here check the information of a here to decide whether to proceed to the next step
-        is_get_detailed_info = True
         for show in showlist:
             if not show.check_rough_info(['date', 'time', 'city', 'url', \
                     'address', 'in_sale_prices', 'sold_out_prices']):
-                is_get_detailed_info = False
                 break
-        if is_get_detailed_info:
+        else:
             for i, show in enumerate(showlist):
                 detailed_info = {'url': show.url}
                 utils.padding_dict(show.extra_fields, detailed_info,
                         ['date', 'time', 'city', 'address', 'in_sale_prices', 'sold_out_prices'])
                 showlist[i].add_event(detailed_info)
+            _LOGGER.info('[%s] show numbers: %d', self.source, len(showlist))
             return showlist
 
         # get detailed infos
@@ -136,6 +143,7 @@ class WebSpider(object):
         for index in need_be_del:
             del showlist[index - del_cnt]
             del_cnt += 1
+        _LOGGER.info('[%s] show numbers: %d', self.source, len(showlist))
         return showlist
 
 class ChinaTicket(WebSpider):

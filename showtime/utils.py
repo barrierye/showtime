@@ -8,6 +8,25 @@ import aiohttp
 import datetime
 import multiprocessing
 
+class TimeRecorder(object):
+    def __init__(self):
+        self.init()
+    def init(self):
+        self.time_without_sleep = time.process_time()
+        self.time = time.perf_counter()
+        self.total_time_without_sleep = 0.0
+        self.total_time = 0.0
+    def press(self):
+        self.time_without_sleep = time.process_time()
+        self.time = time.perf_counter()
+    def release(self):
+        self.total_time_without_sleep += time.process_time() - self.time_without_sleep
+        self.total_time += time.perf_counter() - self.time
+    def count(self):
+        return self.total_time
+    def count_without_sleep(self):
+        return self.total_time_without_sleep
+
 async def async_get_page_by_GET(url, index, page_lsit):
     async with aiohttp.ClientSession() as session:
         async with session.request('GET', url) as resp:
