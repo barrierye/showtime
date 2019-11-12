@@ -64,19 +64,19 @@ Python3.5+
 
 ## Installation
 
-直接安装（如果你更换了pip源，可能需要加上`-i https://pypi.python.org/simple`参数）
+- Install with pip
 
-```bash
-pip install show-time
-```
+  ```bash
+  pip install show-time
+  ```
 
-源码安装
+- Install from source
 
-```bash
-pip install wheel
-python setup.py bdist_wheel
-pip install dist/show-time-0.0.3-py3-none-any.whl
-```
+  ```bash
+  pip install wheel
+  python setup.py bdist_wheel
+  pip install dist/show-time-0.0.3-py3-none-any.whl
+  ```
 
 ## Usage
 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
 ## Bug
 
-如果在使用过程中遇到问题，欢迎在issue中描述问题复现过程。
+If you encounter problems, please describe the problem recurrence process in issue.
 
 ## TODO
 
