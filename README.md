@@ -2,14 +2,13 @@
 
 [![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)](https://github.com/barrierye/showtime#requirements) [![release](https://img.shields.io/github/v/tag/barrierye/showtime?label=release)](https://github.com/barrierye/showtime/releases) [![PyPI](https://img.shields.io/pypi/v/show-time)](https://pypi.org/project/show-time/#files)
 
-用于爬取各种演出（话剧、音乐会、演唱会等）信息的爬虫，__生活需要一点情调__。
+Life is generally simple and boring for science and engineering students who keep running between dormitory, laboratory and teaching building. In order to add some __cultural presence__ on the life, ShowTime is designed, which is a tool based on network spider technology to crawl information for numerous shows such as dramas and concerts.
 
 ## Feature
 
 - 支持多种信息来源，支持列表：
   - [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
   - [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
-  - [ ] 票虫网 [http://www.piaochong.com](http://www.piaochong.com/)
   - [ ] 永乐票务 [https://www.228.com.cn](https://www.228.com.cn/)
   - [x] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
   - [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
@@ -78,6 +77,8 @@ pip install dist/show-time-0.0.3-py3-none-any.whl
 ## Usage
 
 ```python
+import os
+import logging
 import showtime
 from showtime.showspider_factory import ShowSpiderFactory
 
@@ -93,6 +94,12 @@ def load_file(filename):
     return showtime.show_type.ShowList.load(filename)
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+
+    data_path = 'data'
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+
     # 获取showspider的工厂实例
     spider_factory = ShowSpiderFactory()
 
@@ -103,10 +110,8 @@ if __name__ == '__main__':
     total_show_list = spider_factory.get_total_show_list(support_sources, is_parallel=True)
 
     for show_list in total_show_list:
-        # 打印show_list的简略信息
-        print_info(show_list, rough=True)
         # 将结果存储到本地
-        show_list.save('%s.data' % show_list.source)
+        show_list.save('%s/%s.data' % (data_path, show_list.source))
 ```
 
 ## Contribution
