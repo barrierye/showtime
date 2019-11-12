@@ -6,20 +6,26 @@ Life is generally simple and boring for science and engineering students who kee
 
 ## Feature
 
-- 支持多种信息来源，支持列表：
-  - [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
-  - [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
-  - [ ] 永乐票务 [https://www.228.com.cn](https://www.228.com.cn/)
-  - [x] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
-  - [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
-  - [ ] 大麦 [APP]
-  - [ ] 音乐节RSS [小程序]
-  
-- 支持单机并行
+- Support multiple types of information sources
+
+  1. website source:
+     1. [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
+     2. [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
+     3. [ ] 永乐票务 [https://www.228.com.cn](https://www.228.com.cn/)
+     4. [x] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
+     5. [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
+
+  2. APP source:
+     1. [ ] 大麦
+
+  3. applet source:
+     1. [ ] 音乐节RSS
+
+- Single computer parallel
 
   spider间多进程并行，spider内粗粒度多线程并行。一些特殊spider内（如`MengJingHuiWebsite`）细粒度协程并行。
 
-- 支持简单的本地存储/加载功能
+- Simple local storage and loading capabilities by using protobuf
 
   为了使得数据清晰简单，采用protobuf支持human-friendly/序列化存储，数据格式：
   
