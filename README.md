@@ -2,7 +2,7 @@
 
 [![Python version](https://img.shields.io/badge/Python-3.5+-brightgreen.svg)](https://github.com/barrierye/showtime#requirements) [![release](https://img.shields.io/github/v/tag/barrierye/showtime?label=release)](https://github.com/barrierye/showtime/releases) [![PyPI](https://img.shields.io/pypi/v/show-time)](https://pypi.org/project/show-time/#files)
 
-Life is generally simple and boring for science and engineering students who keep running between dormitory, laboratory and teaching building. In order to add some __cultural presence__ on the life, ShowTime is designed, which is a tool based on network spider technology to crawl information for numerous shows such as dramas and concerts.
+Life is generally simple and boring for science and engineering students who keep running between dormitory, laboratory and teaching building. In order to add some __cultural presence__ on the life, showtime is designed, which is a tool based on network spider technology to crawl information for numerous shows such as dramas and concerts.
 
 ## Feature
 
