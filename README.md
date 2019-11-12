@@ -9,11 +9,11 @@ Life is generally simple and boring for science and engineering students who kee
 - Support multiple types of information sources
 
   1. website source:
-     1. [x] 中票在线 [https://www.chinaticket.com](https://www.chinaticket.com/)
-     2. [x] 北航晨兴音乐厅 [https://www.forqian.cn](https://www.forqian.cn/)
-     3. [ ] 永乐票务 [https://www.228.com.cn](https://www.228.com.cn/)
-     4. [x] 北京大学百周年纪念讲堂 [www.pku-hall.com](http://www.pku-hall.com)
-     5. [x] 孟京辉官网 [http://www.mengjinghui.com.cn](http://www.mengjinghui.com.cn/)
+     1. [x] [China Ticket](https://www.chinaticket.com/)
+     2. [x] [Beihang Sunrise Concert Hall](https://www.forqian.cn/)
+     3. [ ] [永乐票务](https://www.228.com.cn/)
+     4. [x] [PKU Hall](http://www.pku-hall.com)
+     5. [x] [MengJingHui website](http://www.mengjinghui.com.cn/)
 
   2. APP source:
      1. [ ] 大麦
