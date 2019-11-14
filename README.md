@@ -21,7 +21,7 @@ Life is generally simple and boring for science and engineering students who kee
   3. applet source:
      1. [ ] 音乐节RSS
 
-- Single omputers parallel support
+- Stand-alone parallel support
 
   When the program is executing, several processes will be launched. Each process processes one data source, and at the same time use of multiple threads to handle multiple requests in a process. For some exceptional sources(such as `MengJingHuiWebsite`), more fine-grained coroutines is implemented.
 
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         show_list.save('%s/%s.data' % (data_path, show_list.source))
 ```
 
-## Bug
+## Issue
 
 If you encounter problems, please describe the problem recurrence process in issue.
 
