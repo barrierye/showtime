@@ -20,15 +20,12 @@ Life is generally simple and boring for science and engineering students who kee
      - [x] [MengJingHui website](http://www.mengjinghui.com.cn/)
      
      - [ ] [北京国际青年戏剧节](http://www.mengjinghui.com.cn/qxj.html?from=singlemessage&isappinstalled=0)
-     
   2. APP source:
-     
-  - [ ] 大麦
-     
+    - [ ] 大麦
   3. applet source:
-     
+  
      - [ ] 音乐节RSS
-
+  
 - Stand-alone parallel support
 
   When the program is executing, several processes will be launched. Each process processes one data source, and at the same time use of multiple threads to handle multiple requests in a process. For some exceptional sources(such as `MengJingHuiWebsite`), more fine-grained coroutines is implemented.
