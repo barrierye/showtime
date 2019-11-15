@@ -1,25 +1,22 @@
 #-*- coding:utf8 -*-
 # Copyright (c) 2019 barriery
 # Python release: 3.7.0
+import pypandoc
 from setuptools import setup, find_packages
-
-with open('README.md', 'r') as f:
-    README = f.read()
 
 setup(
     name='show-time',
-    version='0.0.3',
-    description='A spider that crawls the time of various shows.',
-    long_description=README,
-    long_description_content_type="text/markdown",
+    version='0.0.4',
+    description='A tool based on network spider technology to crawl information for numerous shows such as dramas and concerts.',
+    long_description=pypandoc.convert('README.md', 'rst'),
     url='https://github.com/barrierye/showtime',
-    keywords='show play spider',
+    keywords='show spider',
     
     author='barriery',
     author_email='barriery@qq.com',
     maintainer='barriery',
     maintainer_email='barriery@qq.com',
-    license='MIT'
+    license='MIT',
 
     include_package_data=True,
 
