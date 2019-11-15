@@ -21,9 +21,8 @@ Life is generally simple and boring for science and engineering students who kee
      
      - [ ] [北京国际青年戏剧节](http://www.mengjinghui.com.cn/qxj.html?from=singlemessage&isappinstalled=0)
   2. APP source:
-    - [ ] 大麦
+     - [ ] 大麦
   3. applet source:
-  
      - [ ] 音乐节RSS
   
 - Stand-alone parallel support
