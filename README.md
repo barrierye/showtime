@@ -79,7 +79,7 @@ Python3.5+
   ```bash
   pip install wheel
   python setup.py bdist_wheel
-  pip install dist/show-time-0.0.4-py3-none-any.whl
+  pip install dist/show-time-0.0.5-py3-none-any.whl
   ```
 
 ## Usage

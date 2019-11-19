@@ -6,9 +6,9 @@ from setuptools import setup, find_packages
 
 setup(
     name='show-time',
-    version='0.0.4',
+    version='0.0.5',
     description='A tool based on network spider technology to crawl information for numerous shows such as dramas and concerts.',
-    long_description=pypandoc.convert('README.md', 'rst'),
+    long_description=pypandoc.convert_file('README.md', 'rst'),
     url='https://github.com/barrierye/showtime',
     keywords='show spider',
     
