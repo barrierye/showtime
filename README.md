@@ -22,12 +22,12 @@ Life is generally simple and boring for science and engineering students who kee
      - [ ] [北京国际青年戏剧节](http://www.mengjinghui.com.cn/qxj.html?from=singlemessage&isappinstalled=0)
   2. APP source:
      - [ ] 大麦
-  3. applet source:
+  3. MiniProgram source:
      - [ ] 音乐节RSS
   
 - Stand-alone parallel support
 
-  When the program is executing, several processes will be launched. Each process processes one data source, and at the same time use of multiple threads to handle multiple requests in a process. For some exceptional sources(such as `MengJingHuiWebsite`), more fine-grained coroutines is implemented.
+  When the program is executing, several processes will be launched. Each process processes one data source, and at the same time use of multiple threads to handle multiple requests in a process. For some exceptional sources(such as `孟京辉官网`), more fine-grained coroutines is implemented.
 
 - Simple local storage and loading capabilities by using protobuf
 
@@ -132,5 +132,5 @@ If you encounter problems, please describe the problem recurrence process in iss
 2. 支持尚未支持的Web信息来源
 3. 频繁爬取数据，服务器拒绝访问&&偶尔会崩
 4. 思考AppSpider的基类架构
-5. 思考AppletSpider的基类架构
+5. 思考MiniProgramSpider的基类架构
 6. 支持北航晨兴音乐厅的线上预定
