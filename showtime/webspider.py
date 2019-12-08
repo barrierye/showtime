@@ -108,7 +108,7 @@ class WebSpider(object):
                 utils.padding_dict(show.extra_fields, detailed_info,
                         ['date', 'time', 'city', 'address', 'in_sale_prices', 'sold_out_prices'])
                 showlist[i].add_event(detailed_info)
-            _LOGGER.info('[%s] show numbers: %d', self.source, len(showlist))
+            _LOGGER.info(f'[{self.source}] show numbers: {len(showlist)}')
             return showlist
 
         # get detailed infos
@@ -145,7 +145,7 @@ class WebSpider(object):
         for index in need_be_del:
             del showlist[index - del_cnt]
             del_cnt += 1
-        _LOGGER.info('[%s] show numbers: %d', self.source, len(showlist))
+        _LOGGER.info(f'[{self.source}] show numbers: {len(showlist)}')
         return showlist
 
 class ChinaTicket(WebSpider):
@@ -155,7 +155,7 @@ class ChinaTicket(WebSpider):
         self._home_url = 'https://www.chinaticket.com'
     def _get_rough_url_list(self):
         show = 'wenyi' # only for art-shows
-        url = '%s/%s'%(self._home_url, show)
+        url = f'{self._home_url}/{show}'
         text = self.get_page_by_GET(url)
         whole_s_ticket_list_page_regex = re.compile(
                 r'<div class="s_ticket_list_page">(.*?)</div>', re.DOTALL)
@@ -260,9 +260,10 @@ class PKUHall(WebSpider):
             prices = price_regex.findall(p)
             total_prices.update(prices)
             sold_out_prices.update(prices)
-        return ([float(x) for x in special_prices],
-                [float(x) for x in total_prices-sold_out_prices],
-                [float(x) for x in sold_out_prices])
+        #TODO: 2
+        return ([float(x) for x in special_prices if x != '2'],
+                [float(x) for x in total_prices-sold_out_prices if x != '2'],
+                [float(x) for x in sold_out_prices if x != '2'])
     def _parse_for_rough_info(self, text):
         html = bs4.BeautifulSoup(text, 'lxml')
         table = html.tbody.find_all('tr')
@@ -370,7 +371,7 @@ class MengJingHui(WebSpider):
                 urls = [base_url + '?' + urlencode({'eid': play_id,
                                                     'terminalType': 2}) for event in events]
             else:
-                raise Exception('unknow address<%s>' % address)
+                raise Exception(f'unknow address <{address}>')
         elif buy_type == '直接购票':
             if address in ['上海市黄浦剧场']:
                 # url: http://www.wanshe.cn/orders/buy?eid=30940&ufid=0
@@ -393,9 +394,9 @@ class MengJingHui(WebSpider):
                 urls = [base_url + '?' + urlencode({'eid': play_id,
                                                     'epid': event['event_id']}) for event in events]
             else:
-                raise Exception('unknow address<%s>' % address)
+                raise Exception(f'unknow address <{address}>')
         else:
-            raise Exception('unknow url type<%s>' % buy_type)
+            raise Exception(f'unknow url type <{buy_type}>')
         return [urls, events]
     def __various_parse_for_price_infos(self, address, buy_type, page, play_id, event_id):
         # 不同建筑的处理方式不同
@@ -412,7 +413,7 @@ class MengJingHui(WebSpider):
                 try:
                     building_info_list = json.loads(page)['zonings']
                 except Exception as e:
-                    _LOGGER.error('解析建筑信息异常[%s]<%s>', address, e.__str__())
+                    _LOGGER.error(f'解析建筑信息异常 [{address}]<{e}>')
                     return None
                 seat_info_urls = []
                 for building_info in building_info_list:
@@ -432,7 +433,7 @@ class MengJingHui(WebSpider):
                     try:
                         seat_info_list = json.loads(page)
                     except Exception as e:
-                        _LOGGER.error('解析座位信息异常<%s>', e.__str__())
+                        _LOGGER.error(f'解析座位信息异常 <{e}>')
                     for seat_info in seat_info_list:
                         fare = seat_info['fare']
                         status = seat_info['status']
@@ -443,14 +444,14 @@ class MengJingHui(WebSpider):
                                'sold_out_prices': list(total - in_sale)}
                 return json.dumps(prices_data)
             else:
-                raise Exception('unknow address<%s>' % address)
+                raise Exception(f'unknow address <{address}>')
         elif buy_type == '直接购票':
             if address in ['上海市黄浦剧场']:
                 return page
             else:
-                raise Exception('unknow address<%s>' % address)
+                raise Exception(f'unknow address <{address}>')
         else:
-            raise Exception('unknow buy url type<%s>' % buy_type)
+            raise Exception(f'unknow buy url type <{buy_type}>')
     def __various_get_prices(self, address, buy_type, page):
         # 不同建筑的处理方式不同
         # address: 国家话剧院先锋剧场, 北京蜂巢剧场, 上海市黄浦剧场, 北京保利剧院
@@ -460,7 +461,7 @@ class MengJingHui(WebSpider):
                 try:
                     seat_info_list = json.loads(page)
                 except Exception as e:
-                    _LOGGER.error('解析座位信息异常[%s]<%s>', address, e.__str__())
+                    _LOGGER.error(f'解析座位信息异常 [{address}]<{e}>')
                     return None
                 # 得到seat信息后检查在售票价
                 in_sale = set()
@@ -477,17 +478,17 @@ class MengJingHui(WebSpider):
                 try:
                     prices_data = json.loads(page)
                 except Exception as e:
-                    _LOGGER.error('解析价格信息异常<%s>', e.__str__())
+                    _LOGGER.error(f'解析价格信息异常 <{e}>')
                 in_sale_prices = [float(x) for x in prices_data['in_sale_prices']]
                 sold_out_prices = [float(x) for x in prices_data['sold_out_prices']]
             else:
-                raise Exception('unknow address<%s>' % address)
+                raise Exception(f'unknow address <{address}>')
         elif buy_type == '直接购票':
             if address in ['上海市黄浦剧场']:
                 try:
                     ticket_info_list = json.loads(page)['ticket']
                 except Exception as e:
-                    _LOGGER.error('解析票据信息异常[%s]<%s>', address, e.__str__())
+                    _LOGGER.error(f'解析票据信息异常 [{address}]<{e}>')
                     return None
                 in_sale_prices = []
                 sold_out_prices = []
@@ -497,15 +498,14 @@ class MengJingHui(WebSpider):
                     else:
                         sold_out_prices.append(float(info['price']))
             else:
-                raise Exception('unknow address<%s>' % address)
+                raise Exception(f'unknow address <{address}>')
         else:
-            raise Exception('unknow buy url type<%s>' % buy_type)
+            raise Exception(f'unknow buy url type <{buy_type}>')
         return [in_sale_prices, sold_out_prices]
     def _get_detailed_page(self, url):
         # 由于网站比较特殊，故在这里完成get和parse，并返回一个json_str
         eid = url.split('/')[-1]
 
-        _LOGGER.debug('[_get_detailed_page] url: %s', url)
         text = self.get_page_by_GET(url)
         html = bs4.BeautifulSoup(text,'lxml')
         info = html.find('', {'class': 'info'})
@@ -515,7 +515,14 @@ class MengJingHui(WebSpider):
         buy_href = buy_button.attrs['href']
         buy_type = buy_button.string.strip()
 
-        urls_and_events = self.__various_get_urls_and_events(address, buy_href, buy_type, html, eid)
+        _LOGGER.debug(f'[_get_detailed_page] url: {url}')
+        _LOGGER.debug(f'[_get_detailed_page] address: {address}, buy_href: {buy_href}, buy_type: {buy_type}, eid: {eid}')
+        try:
+            urls_and_events = self.__various_get_urls_and_events(address, buy_href, buy_type, html, eid)
+        except Exception as e:
+            _LOGGER.error(e)
+            return None
+        
         if urls_and_events is None:
             return None
         urls, events = urls_and_events

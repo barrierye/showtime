@@ -18,7 +18,8 @@ def load_file(filename):
     return showtime.show_type.ShowList.load(filename)
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%Y-%m-%d %H:%M', level=logging.INFO)
 
     data_path = 'data'
     if not os.path.exists(data_path):
