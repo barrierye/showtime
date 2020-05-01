@@ -229,7 +229,7 @@ class Event(dict):
                   'city': proto.city,
                   'address': proto.address,
                   'in_sale_prices': list(proto.prices.in_sale),
-                  'sold_out_prices': list(proto.price.sold_out)}
+                  'sold_out_prices': list(proto.prices.sold_out)}
         for key, value in proto.extra_fields.items():
             params[key] = value
         event = Event(params)
