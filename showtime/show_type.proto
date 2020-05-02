@@ -23,6 +23,6 @@ message Event {
 }
 
 message Price {
-  repeated float in_sale = 1;
-  repeated float sold_out = 2;
+  repeated string in_sale = 1;
+  repeated string sold_out = 2;
 }

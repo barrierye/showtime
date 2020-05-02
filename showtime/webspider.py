@@ -191,10 +191,8 @@ class ChinaTicket(WebSpider):
         in_sale_prices_regex = re.compile(r'<span>(.*?)</span>')
         sold_out_prices_regex = re.compile(r'<span class="ys">(.*?)</span>')
         for i, info in enumerate(detailed_infos):
-            detailed_infos[i]['in_sale_prices'] = \
-                    [float(x) for x in in_sale_prices_regex.findall(info['total_price'])]
-            detailed_infos[i]['sold_out_prices'] = \
-                    [float(x) for x in sold_out_prices_regex.findall(info['total_price'])]
+            detailed_infos[i]['in_sale_prices'] = in_sale_prices_regex.findall(info['total_price'])
+            detailed_infos[i]['sold_out_prices'] = sold_out_prices_regex.findall(info['total_price'])
             detailed_infos[i].pop('total_price')
         return detailed_infos
 

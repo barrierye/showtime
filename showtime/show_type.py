@@ -177,18 +177,18 @@ class Event(dict):
     def _valid_city(self, city):
         # data from: https://baike.baidu.com/item/中国城市新分级名单?fr=aladdin
         valid_citys = set(['北京', '天津', '上海', '重庆', '河北', '山西', '辽宁', \
-                               '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西', \
-                               '山东', '河南', '湖北', '湖南', '广东', '海南', '四川', \
-                               '贵州', '云南', '陕西', '甘肃', '青海', '台湾', '内蒙古', \
-                               '广西', '西藏', '宁夏', '新疆', '香港', '澳门']) | \
-                          set(['北京', '上海', '广州', '深圳']) | \
-                          set(['成都', '杭州', '重庆', '武汉', '西安', '苏州', '天津', \
-                               '南京', '长沙', '郑州', '东莞', '青岛', '沈阳', '宁波', '昆明']) | \
-                          set(['无锡', '佛山', '合肥', '大连', '福州', '厦门', '哈尔滨', \
-                               '济南', '温州', '南宁', '长春', '泉州', '石家庄', '贵阳', \
-                               '南昌', '金华', '常州', '南通', '嘉兴', '太原', '徐州', \
-                               '惠州', '珠海', '中山', '台州', '烟台', '兰州', '绍兴', \
-                               '海口', '扬州'])
+                           '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西', \
+                           '山东', '河南', '湖北', '湖南', '广东', '海南', '四川', \
+                           '贵州', '云南', '陕西', '甘肃', '青海', '台湾', '内蒙古', \
+                           '广西', '西藏', '宁夏', '新疆', '香港', '澳门']) | \
+                      set(['北京', '上海', '广州', '深圳']) | \
+                      set(['成都', '杭州', '重庆', '武汉', '西安', '苏州', '天津', \
+                           '南京', '长沙', '郑州', '东莞', '青岛', '沈阳', '宁波', '昆明']) | \
+                      set(['无锡', '佛山', '合肥', '大连', '福州', '厦门', '哈尔滨', \
+                           '济南', '温州', '南宁', '长春', '泉州', '石家庄', '贵阳', \
+                           '南昌', '金华', '常州', '南通', '嘉兴', '太原', '徐州', \
+                           '惠州', '珠海', '中山', '台州', '烟台', '兰州', '绍兴', \
+                           '海口', '扬州'])
         return city in valid_citys
     def _valid_address(self, address):
         return True
@@ -196,7 +196,7 @@ class Event(dict):
         if not isinstance(prices, list):
             return False
         for price in prices:
-            if not isinstance(price, float):
+            if not (isinstance(price, float) or isinstance(price, str)):
                 return False
         return True
     def _valid_in_sale_prices(self, prices):
@@ -215,8 +215,8 @@ class Event(dict):
         proto.url = self['url']
         proto.city = self['city']
         proto.address = self['address']
-        proto.prices.in_sale.extend(self['in_sale_prices'])
-        proto.prices.sold_out.extend(self['sold_out_prices'])
+        proto.prices.in_sale.extend([str(p) for p in self['in_sale_prices']])
+        proto.prices.sold_out.extend([str(p) for p in self['sold_out_prices']])
         if not without_extra_fields:
             for key, value in self.extra_fields.items():
                 proto.extra_fields[key] = str(value)
