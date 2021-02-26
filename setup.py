@@ -25,7 +25,7 @@ setup(
     install_requires=[
         'beautifulsoup4==4.8.1',
         'lxml==4.4.1',
-        'aiohttp==3.6.2',
+        'aiohttp==3.7.4',
         'requests==2.22.0',
         'protobuf==3.10.0',
     ],
