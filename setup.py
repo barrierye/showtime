@@ -27,7 +27,7 @@ setup(
         'lxml==4.4.1',
         'aiohttp==3.6.2',
         'requests==2.22.0',
-        'protobuf==3.10.0',
+        'protobuf==3.15.0',
     ],
 
     classifiers = [
